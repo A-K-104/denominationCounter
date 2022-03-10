@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+{% block content %}
+
+<body>
+
+    <h1>Teams page</h1>
+    <table>
+        <tr>
+            <th>team id</th>
+            <th>team name</th>
+            <th>del</th>
+        </tr>
+        {%for team in teams%}
+        <tr>
+            <td>
+                <p style="color:{{team.color}};">{{team.id}}</p>
+            </td>
+            <td>
+                <p style="color:{{team.color}};">
+                    {{team.name}}</p>
+            </td>
+        </tr>
+        {%endfor%}
+    </table>
+
+
+    <form action="/teams" method="post">
+        <input type="text" name="team_name"required>
+        <input type="color" name="team_color"required>
+        <button name="add_team" style="visibility:show">enter</button>
+    </form>
+    {{message}}
+</body>
+{% endblock %}
+
+</html>

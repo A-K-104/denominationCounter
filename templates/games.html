@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+{% block content %}
+
+<body>
+
+    <h1>Teams page</h1>
+    <table>
+        <tr>
+            <th>team id</th>
+            <th>team name</th>
+            <th>del</th>
+        </tr>
+        {%for game in games%}
+        <tr>
+            <td>
+                <p>{{game.id}}</p>
+            </td>
+            <td>
+                <p>
+                    {{game.name}}</p>
+            </td>
+            <td>
+                <p>
+                    {{game.active}}</p>
+            </td>
+        </tr>
+        {%endfor%}
+    </table>
+
+
+    <form action="/games" method="post">
+        <input type="text" name="game_name"required>
+        <button name="add_team" style="visibility:show">enter</button>
+    </form>
+    {{message}}
+</body>
+{% endblock %}
+
+</html>

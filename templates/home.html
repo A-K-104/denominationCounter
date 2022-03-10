@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+{% block content %}
+
+<body>
+
+    <h1>Home page</h1>
+
+
+
+        <form action="/log_to_game" method="post">
+            <input type="number" name="game_id"required>
+            <button name="login" style="visibility:show">enter</button>
+        </form>
+        {{messages}}
+</body>
+{% endblock %}
+
+</html>
