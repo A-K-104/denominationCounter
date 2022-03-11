@@ -14,7 +14,12 @@
             <th>del</th>
         </tr>
         {%for team in teams%}
-        <tr>
+        <tr
+        {%if teamInControl== team.id%}
+                style="background-color: {{team.color}};"
+                {%endif%}
+        >
+
             <td>
                 <p style="color:{{team.color}};">{{team.id}}</p>
             </td>
@@ -24,7 +29,9 @@
             </td>
             <td>
                 <form action="/station-handler?game-id={{gameId}}&station-id={{stationId}}" method="post">
-                    <button name="setStatus" style="visibility:show">take control</button>
+                    <button name="setStatus"
+                        style="visibility:show; background-color: {{team.color}}; height: 200px; width: 200px;">take
+                        control</button>
                     <input name="teamId" type="hidden" value={{team.id}}>
                 </form>
             </td>
@@ -39,7 +46,7 @@
     </form>
 </body>
 {% endblock %}
-<script>
+<!-- <script>
     const interval = setInterval(function () {
         fetch('/game-is-alive?game-id={{gameId}}')
             .then((response) => {
@@ -54,6 +61,6 @@
             })
 
     }, 5000);
-</script>
+</script> -->
 
 </html>
