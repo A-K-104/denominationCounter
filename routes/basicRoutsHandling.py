@@ -49,10 +49,11 @@ def teams():
 @basic_routs_handling.route('/log_to_game', methods=['GET', 'POST'])
 def log_to_game():
     if request.method == "POST":
-        game = db.session.query(Games.id).filter_by(id=request.form['game_id']).first()
+        game = Games.query.get(request.form["game_id"])
         if game is None:
             return redirect(f"/home?messages=wrong_error_code")
-        return game.name
+        if game.active:
+            return redirect(f"/live-game?game-id={game.id}")
     return redirect(f"/home?messages=wrong_method")
 
 
