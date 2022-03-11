@@ -4,7 +4,7 @@
 
 <body>
 
-    <h1>Teams page</h1>
+    <h1>Game page</h1>
     <table>
         <tr>
             <th>team id</th>
@@ -24,13 +24,23 @@
                 <p>
                     {{game.active}}</p>
             </td>
+            <td>
+                <p>
+                    {{game.points}}</p>
+            </td>
+            <td>
+                <form action="/games" method="post">
+                    <button name="setStatus" style="visibility:show">active/deactivate</button>
+                    <input name="gameId" type="hidden" value={{game.id}}>
+                </form>
+            </td>
         </tr>
         {%endfor%}
     </table>
 
 
     <form action="/games" method="post">
-        <input type="text" name="game_name"required>
+        <input type="text" name="game_name" required>
         <button name="add_team" style="visibility:show">enter</button>
     </form>
     {{message}}

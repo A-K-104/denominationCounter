@@ -1,4 +1,8 @@
-from flask import Blueprint, render_template, request
+import datetime
+import datetime as dt
+from typing import Tuple
+
+from flask import Blueprint, render_template, request, Response
 from werkzeug.utils import redirect
 
 import constance
@@ -57,12 +61,30 @@ def games():
     message = ""
     if request.method == "POST":
         if request.form.__contains__('game_name'):
-            if db.session.query(Teams.name).filter_by(name=request.form['game_name']).first() is None:
+            if db.session.query(Games.name).filter_by(name=request.form['game_name']).first() is None:
                 new_game = Games(name=request.form['game_name'])
                 db.session.add(new_game)
                 db.session.commit()
             else:
                 message = "name already exist"
+        elif request.form.__contains__('setStatus') and request.form.__contains__('gameId'):
+            games = Games.query.order_by(Games.id)
+            stations = Stations.query.order_by(Stations.id)
+            for game in games:
+                if game.active:
+                    for station in stations:
+                        arr_of_game: dict = game.points
+                        arr_of_game = setPoints(arr_of_game,station)
+                        game.points = None
+                        db.session.commit()
+
+                        game.points = arr_of_game
+                        station.team = -1
+                        station.take_over_time = datetime.datetime.utcnow()
+                game.active = (str(game.id) == request.form['gameId'])
+
+            db.session.commit()
+
         else:
             message = "failed to get par"
     games = Games.query.order_by(Games.id)
@@ -84,3 +106,74 @@ def stations():
             message = "failed to get par"
     stations = Stations.query.order_by(Stations.id)
     return render_template("stations.html", stations=list(stations), message=message)
+
+
+@basic_routs_handling.route('/live-game', methods=['GET', 'POST'])
+def live_game():
+    message = ""
+    if not request.args.__contains__("game-id"):
+        return redirect("/home?messages=missing_game_id")
+    if request.method == "POST":
+        if request.form.__contains__('station-id'):
+            return redirect(
+                f"/station-handler?station-id={request.form['station-id']}&game-id={request.args.get('game-id')}")
+    stations = Stations.query.order_by(Stations.id)
+    return render_template("live_game.html", stations=list(stations), message=message,
+                           gameId=request.args.get('game-id'))
+
+
+def setPoints(arr_of_game, station):
+    if arr_of_game is not None:
+        if arr_of_game.get(str(station.team)) is None:
+            arr_of_game.update({str(station.team): {str(station.id): 0}})
+    else:
+        arr_of_game = {str(station.team): {str(station.id): 0}}
+    added_points = (datetime.datetime.utcnow() - station.take_over_time).seconds * station.point / 60
+    updatedVal = arr_of_game.get(str(station.team)).get(str(station.id)) + added_points
+    station.take_over_time = datetime.datetime.utcnow()
+    arr_of_game.update({str(station.team): {str(station.id): updatedVal}})
+    return arr_of_game
+
+
+@basic_routs_handling.route('/station-handler', methods=['GET', 'POST'])
+def station_handler():
+    message = ""
+
+    if not request.args.__contains__("game-id"):
+        return redirect("/home?messages=missing_game_id")
+    if not request.args.__contains__("station-id"):
+        return redirect("/home?messages=missing_game_id")
+    station = Stations.query.get(request.args['station-id'])
+    game = Games.query.get(request.args['game-id'])
+
+    if request.method == "POST":
+        if request.form.__contains__('teamId'):
+            if db.session.query(Teams.id).filter_by(id=request.form['teamId']).first() is None:
+                return redirect("/home?messages=failed_to_find_team")
+            if not station.team == -1:
+                arr_of_game: dict = game.points
+                arr_of_game = setPoints(arr_of_game,station)
+                game.points = None
+                db.session.commit()
+
+                game.points = arr_of_game
+                db.session.commit()
+
+            station.team = request.form['teamId']
+            db.session.commit()
+    teams = Teams.query.order_by(Teams.id)
+    return render_template("live_station.html", teams=list(teams), message=message,
+                           teamInControl=station.team,
+                           gameId=request.args.get('game-id'),
+                           stationId=request.args.get('station-id'))
+
+
+@basic_routs_handling.route('/game-is-alive', methods=['GET'])
+def game_is_alive() -> tuple[str, int]:
+    if db.session.query(Games.id).filter_by(id=request.args.get('game-id')).first() is not None:
+        game = Games.query.get(request.args['game-id'])
+        print(game.active)
+
+        if game.active:
+            return "true", 200
+    return "false", 201

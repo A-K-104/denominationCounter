@@ -4,7 +4,7 @@
 
 <body>
 
-    <h1>Stations page</h1>
+    <h1>Live Game</h1>
     <table>
         <tr>
             <th>station id</th>
@@ -25,26 +25,15 @@
             </td>
             <td>
                 <p>
-                    {{station.point}}</p>
-            </td>
-            <td>
-                <p>
-                    {{station.team}}</p>
-            </td>
-            <td>
-                <p>
-                    {{station.take_over_time}}</p>
+                <form action="/live-game?game-id={{gameId}}" method="post">
+                    <button name="setStatus" style="visibility:show">enter station</button>
+                    <input name="station-id" type="hidden" value={{station.id}}>
+                </form>
             </td>
         </tr>
         {%endfor%}
     </table>
 
-
-    <form action="/stations" method="post">
-        <input type="text" name="stations_name" required>
-        <input type="number" name="stations_point" required>
-        <button name="add_team" style="visibility:show">enter</button>
-    </form>
     {{message}}
 </body>
 {% endblock %}
