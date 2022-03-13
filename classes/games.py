@@ -1,8 +1,7 @@
 from datetime import datetime
-import uuid
-import bcrypt
+
 from flask import session
-from sqlalchemy.dialects.postgresql import UUID
+
 import constance
 
 db = constance.db
