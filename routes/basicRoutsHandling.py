@@ -174,12 +174,12 @@ def station_handler():
                            stationId=request.args.get('station-id'))
 
 
-@basic_routs_handling.route('/game-is-alive', methods=['GET'])
-def game_is_alive() -> tuple[str, int]:
-    if db.session.query(Games.id).filter_by(id=request.args.get('game-id')).first() is not None:
-        game = Games.query.get(request.args['game-id'])
-        print(game.active)
-
-        if game.active:
-            return "true", 200
-    return "false", 201
+# @basic_routs_handling.route('/game-is-alive', methods=['GET'])
+# def game_is_alive() -> tuple[str, int]:
+#     if db.session.query(Games.id).filter_by(id=request.args.get('game-id')).first() is not None:
+#         game = Games.query.get(request.args['game-id'])
+#         print(game.active)
+#
+#         if game.active:
+#             return "true", 200
+#     return "false", 201
