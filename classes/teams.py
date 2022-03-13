@@ -1,6 +1,4 @@
 from datetime import datetime
-import uuid
-import bcrypt
 from flask import session
 import constance
 
