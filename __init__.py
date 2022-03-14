@@ -12,5 +12,5 @@ from flask_sqlalchemy import SQLAlchemy
 # @app.before_first_request
 # def create_tables():
 #     db.create_all()
-from app import app
-app.run()
+# from app import app
+# app.run()
