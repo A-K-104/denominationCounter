@@ -12,3 +12,4 @@ app.config['SQLALCHEMY_BINDS'] = {'stations': 'sqlite:///gameData.db', 'games': 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 sess = Session(app)
 db = SQLAlchemy(app)
+#  sudo gunicorn3 -w 4 --reload -b localhost:5000 denominationCounter:app
