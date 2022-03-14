@@ -13,6 +13,4 @@ from flask_sqlalchemy import SQLAlchemy
 # def create_tables():
 #     db.create_all()
 from app import app
-
-if __name__ == "__main__":
-    app.run()
+app.run()
