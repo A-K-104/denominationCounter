@@ -5,7 +5,6 @@ from routes.basicRoutsHandling import basic_routs_handling
 
 app = constance.app
 db = constance.db
-app = constance.app
 sess = constance.sess
 app.register_blueprint(basic_routs_handling)
 
