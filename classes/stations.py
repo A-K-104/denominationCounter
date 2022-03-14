@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask import session
-import constance
+import __init__
 
-db = constance.db
+db = __init__.db
 
 
 class Stations(db.Model):

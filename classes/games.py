@@ -2,10 +2,10 @@ from datetime import datetime
 
 from flask import session
 
-import constance
+import __init__
 
-db = constance.db
-
+# db = constance.db
+db = __init__.db
 
 class Games(db.Model):
     # to init db in terminal type: python ->from app import db->db.create_all()-> exit(). and you are set!
