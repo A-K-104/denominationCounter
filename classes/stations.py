@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import session
+
 import constance
 
 db = constance.db
