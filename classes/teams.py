@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask import session
-import __init__
+import constance
 
-db = __init__.db
+db = constance.db
 
 
 class Teams(db.Model):

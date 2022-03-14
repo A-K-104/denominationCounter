@@ -2,14 +2,14 @@ import datetime
 
 from flask import Blueprint, render_template, request
 from werkzeug.utils import redirect
-import __init__
-# import constance
+import constance
+
 from classes.games import Games
 from classes.stations import Stations
 from classes.teams import Teams
 
 basic_routs_handling = Blueprint('basic_routs_handling', __name__)
-db = __init__.db
+db = constance.db
 
 
 @basic_routs_handling.route('/', methods=['GET', 'POST'])

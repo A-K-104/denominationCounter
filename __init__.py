@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
 import constance
 from routes.basicRoutsHandling import basic_routs_handling
 
