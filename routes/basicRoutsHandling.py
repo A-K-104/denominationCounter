@@ -151,7 +151,9 @@ def setPoints(arr_of_game, station):
     else:
         updatedVal = arr_of_game.get(str(station.team)).get(str(station.id)) + added_points
     station.take_over_time = datetime.datetime.utcnow()
-    arr_of_game.update({str(station.team): {str(station.id): updatedVal}})
+    temp_update = arr_of_game.get(str(station.team))
+    temp_update.update({str(station.id): updatedVal})
+    arr_of_game.update({str(station.team):temp_update})
     return arr_of_game
 
 
@@ -184,7 +186,7 @@ def station_handler():
             station.team = request.form['teamId']
             db.session.commit()
     teams = Teams.query.order_by(Teams.id)
-    return render_template("live_station.html", teams=list(teams), message=message, #F2$4592d
+    return render_template("live_station.html", teams=list(teams), message=message,
                            teamInControl=station.team,
                            gameId=request.args.get('game-id'),
                            stationId=request.args.get('station-id'))
