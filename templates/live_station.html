@@ -11,14 +11,10 @@
         <tr>
             <th>team id</th>
             <th>team name</th>
-            <th>del</th>
+            <th>take control</th>
         </tr>
         {%for team in teams%}
-        <tr
-        {%if teamInControl== team.id%}
-                style="background-color: {{team.color}};"
-                {%endif%}
-        >
+        <tr {%if teamInControl==team.id%} style="background-color: {{team.color}};" {%endif%}>
 
             <td>
                 <p style="color:{{team.color}};">{{team.id}}</p>

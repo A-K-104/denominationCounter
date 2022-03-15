@@ -37,6 +37,11 @@
                 <p>
                     {{station.take_over_time}}</p>
             </td>
+            <td>
+                <form action="/stations" method="post"> 
+                    <button name="removeGameId" style="visibility:show" value="{{station.id}}">remove</button>
+                </form>
+            </td>
         </tr>
         {%endfor%}
     </table>

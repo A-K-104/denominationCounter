@@ -22,6 +22,11 @@
                 <p style="color:{{team.color}};">
                     {{team.name}}</p>
             </td>
+            <td>
+                <form action="/teams" method="post"> 
+                    <button name="removeGameId" style="visibility:show" value="{{team.id}}">remove</button>
+                </form>
+            </td>
         </tr>
         {%endfor%}
     </table>

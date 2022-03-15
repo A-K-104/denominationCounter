@@ -8,9 +8,12 @@
     <h1>Game page</h1>
     <table>
         <tr>
-            <th>team id</th>
-            <th>team name</th>
+            <th>game id</th>
+            <th>game name</th>
+            <th>game status</th>
+            <th>game points</th>
             <th>del</th>
+            <th>change status</th>
         </tr>
         {%for game in games%}
         <tr>
@@ -28,6 +31,11 @@
             <td>
                 <p>
                     {{game.points}}</p>
+            </td>
+            <td>
+                <form action="/games" method="post"> 
+                    <button name="removeGameId" style="visibility:show" value="{{game.id}}">remove</button>
+                </form>
             </td>
             <td>
                 <form action="/games" method="post">

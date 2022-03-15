@@ -38,6 +38,11 @@ def teams():
                     message = "color already exist"
             else:
                 message = "name already exist"
+        elif request.form.__contains__('removeTeamId'):
+            team = Teams.query.get(request.form['removeTeamId'])
+            if team is not None:
+                db.session.delete(team)
+                db.session.commit()
         else:
             message = "failed to get par"
     teams = Teams.query.order_by(Teams.id)
@@ -75,9 +80,10 @@ def games():
                 if game.active:
                     for station in stations:
                         arr_of_game: dict = game.points
-                        arr_of_game = setPoints(arr_of_game,station)
-                        game.points = None
-                        db.session.commit()
+                        if not station.team == -1:
+                            arr_of_game = setPoints(arr_of_game,station)
+                            game.points = None
+                            db.session.commit()
 
                         game.points = arr_of_game
                         station.team = -1
@@ -85,7 +91,12 @@ def games():
                 game.active = (str(game.id) == request.form['gameId'])
 
             db.session.commit()
-
+        elif request.form.__contains__('removeGameId'):
+            print(f'removed: {request.form["removeGameId"]}')
+            game = Games.query.get(request.form['removeGameId'])
+            if game is not None:
+                db.session.delete(game)
+                db.session.commit()
         else:
             message = "failed to get par"
     games = Games.query.order_by(Games.id)
@@ -103,6 +114,11 @@ def stations():
                 db.session.commit()
             else:
                 message = "name already exist"
+        elif request.form.__contains__('removeStationId'):
+            station = Stations.query.get(request.form['removeStationId'])
+            if station is not None:
+                db.session.delete(station)
+                db.session.commit()
         else:
             message = "failed to get par"
     stations = Stations.query.order_by(Stations.id)
@@ -154,6 +170,8 @@ def station_handler():
         if request.form.__contains__('teamId'):
             if db.session.query(Teams.id).filter_by(id=request.form['teamId']).first() is None:
                 return redirect("/home?messages=failed_to_find_team")
+            if not game.active:
+                return redirect("/home?messages=game_is_not_active")
             if not station.team == -1:
                 arr_of_game: dict = game.points
                 arr_of_game = setPoints(arr_of_game,station)
