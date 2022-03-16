@@ -32,7 +32,7 @@
 
                 {%for teamPoint in game.points%}
                 {%if teamPoint != "-1"%}
-                <p>
+                <p style="color:{{teams[(teamPoint|int)-1].color}};">
                     {{teams[(teamPoint|int)-1].name}}:{{game.points[teamPoint]["total"]}}
                 </p>
                 {%endif%}

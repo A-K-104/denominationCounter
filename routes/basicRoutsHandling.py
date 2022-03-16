@@ -183,19 +183,20 @@ def station_handler():
         if request.form.__contains__('teamId'):
             if db.session.query(Teams.id).filter_by(id=request.form['teamId']).first() is None:
                 return redirect("/home?messages=failed_to_find_team")
-            if not game.active:
-                return redirect("/home?messages=game_is_not_active")
-            if not station.team == -1:
-                arr_of_game: dict = game.points
-                arr_of_game = setPoints(arr_of_game, station)
-                game.points = None
-                db.session.commit()
+            if game is not None:
+                if not game.active:
+                    return redirect("/home?messages=game_is_not_active")
+                if not station.team == -1:
+                    arr_of_game: dict = game.points
+                    arr_of_game = setPoints(arr_of_game, station)
+                    game.points = None
+                    db.session.commit()
 
-                game.points = arr_of_game
-                db.session.commit()
+                    game.points = arr_of_game
+                    db.session.commit()
 
-            station.team = request.form['teamId']
-            db.session.commit()
+                station.team = request.form['teamId']
+                db.session.commit()
     teams = Teams.query.order_by(Teams.id)
     return render_template("live_station.html", teams=list(teams), message=message,
                            teamInControl=station.team,
