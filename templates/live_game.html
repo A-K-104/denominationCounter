@@ -1,12 +1,15 @@
 <!DOCTYPE html>
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/styles.css') }}">
+
 <html>
 {% extends 'navigationBar.html'%}
 
 {% block content %}
 
 <body>
-
-    <h1>Live Game {gameId}}</h1>
+   
+    <h1>Live Game {{gameId}}</h1>
+    <div>
     <table>
         <tr>
             <th>station id</th>
@@ -32,9 +35,10 @@
         </tr>
         {%endfor%}
     </table>
-
+</div>
     {{message}}
 </body>
 {% endblock %}
+
 
 </html>

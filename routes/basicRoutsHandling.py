@@ -103,14 +103,12 @@ def games():
     games = list(games)
     for i in range(len(games)):
         for team in list(games[i].points):
-
             if games[i].points.get(team) is not None:
                 point = 0
                 for local in games[i].points.get(team):
                     point += games[i].points.get(team).get(local)
                 games[i].points[team]["total"] = point
     teams = Teams.query.order_by(Teams.id)
-    print(list(teams))
     return render_template("games.html", games=list(games), message=message, points="games_score", teams=list(teams))
 
 
@@ -178,25 +176,27 @@ def station_handler():
         return redirect("/home?messages=missing_game_id")
     station = Stations.query.get(request.args['station-id'])
     game = Games.query.get(request.args['game-id'])
-
+    if game is None:
+        return redirect("/home?messages=game_is_none")
+    if station is None:
+        return redirect("/home?messages=station_is_none")
     if request.method == "POST":
         if request.form.__contains__('teamId'):
             if db.session.query(Teams.id).filter_by(id=request.form['teamId']).first() is None:
                 return redirect("/home?messages=failed_to_find_team")
-            if game is not None:
-                if not game.active:
-                    return redirect("/home?messages=game_is_not_active")
-                if not station.team == -1:
-                    arr_of_game: dict = game.points
-                    arr_of_game = setPoints(arr_of_game, station)
-                    game.points = None
-                    db.session.commit()
-
-                    game.points = arr_of_game
-                    db.session.commit()
-
-                station.team = request.form['teamId']
+            if not game.active:
+                return redirect("/home?messages=game_is_not_active")
+            if not station.team == -1:
+                arr_of_game: dict = game.points
+                arr_of_game = setPoints(arr_of_game, station)
+                game.points = None
                 db.session.commit()
+
+                game.points = arr_of_game
+                db.session.commit()
+
+            station.team = request.form['teamId']
+            db.session.commit()
     teams = Teams.query.order_by(Teams.id)
     return render_template("live_station.html", teams=list(teams), message=message,
                            teamInControl=station.team,

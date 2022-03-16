@@ -1,11 +1,11 @@
 <!DOCTYPE html>
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/styles.css') }}">
 <html>
-
 {% block content %}
 
 <body>
-
     <h1>Live station {{stationId}}</h1>
+    <div>
     <table>
         <tr>
             <th>team id</th>
@@ -33,7 +33,7 @@
         </tr>
         {%endfor%}
     </table>
-
+</div>
     {{message}}
 
     <form id="test" action="/home" method="post">
