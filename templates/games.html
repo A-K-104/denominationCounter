@@ -29,11 +29,18 @@
                     {{game.active}}</p>
             </td>
             <td>
+
+                {%for teamPoint in game.points%}
+                {%if teamPoint != "-1"%}
                 <p>
-                    {{game.points}}</p>
+                    {{teams[(teamPoint|int)-1].name}}:{{game.points[teamPoint]["total"]}}
+                </p>
+                {%endif%}
+                {%endfor%}
+
             </td>
             <td>
-                <form action="/games" method="post"> 
+                <form action="/games" method="post">
                     <button name="removeGameId" style="visibility:show" value="{{game.id}}">remove</button>
                 </form>
             </td>

@@ -81,7 +81,7 @@ def games():
                     for station in stations:
                         arr_of_game: dict = game.points
                         if not station.team == -1:
-                            arr_of_game = setPoints(arr_of_game,station)
+                            arr_of_game = setPoints(arr_of_game, station)
                             game.points = None
                             db.session.commit()
 
@@ -100,7 +100,18 @@ def games():
         else:
             message = "failed to get par"
     games = Games.query.order_by(Games.id)
-    return render_template("games.html", games=list(games), message=message)
+    games = list(games)
+    for i in range(len(games)):
+        for team in list(games[i].points):
+
+            if games[i].points.get(team) is not None:
+                point = 0
+                for local in games[i].points.get(team):
+                    point += games[i].points.get(team).get(local)
+                games[i].points[team]["total"] = point
+    teams = Teams.query.order_by(Teams.id)
+    print(list(teams))
+    return render_template("games.html", games=list(games), message=message, points="games_score", teams=list(teams))
 
 
 @basic_routs_handling.route('/stations', methods=['GET', 'POST'])
@@ -153,7 +164,7 @@ def setPoints(arr_of_game, station):
     station.take_over_time = datetime.datetime.utcnow()
     temp_update = arr_of_game.get(str(station.team))
     temp_update.update({str(station.id): updatedVal})
-    arr_of_game.update({str(station.team):temp_update})
+    arr_of_game.update({str(station.team): temp_update})
     return arr_of_game
 
 
@@ -176,7 +187,7 @@ def station_handler():
                 return redirect("/home?messages=game_is_not_active")
             if not station.team == -1:
                 arr_of_game: dict = game.points
-                arr_of_game = setPoints(arr_of_game,station)
+                arr_of_game = setPoints(arr_of_game, station)
                 game.points = None
                 db.session.commit()
 
@@ -190,7 +201,6 @@ def station_handler():
                            teamInControl=station.team,
                            gameId=request.args.get('game-id'),
                            stationId=request.args.get('station-id'))
-
 
 # @basic_routs_handling.route('/game-is-alive', methods=['GET'])
 # def game_is_alive() -> tuple[str, int]:
