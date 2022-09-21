@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/styles.css') }}">
+<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">
 <html>
 {% block content %}
 
@@ -8,26 +8,46 @@
     <div>
     <table>
         <tr>
+
+        {%for teamId in range(2)%}
             <th>team id</th>
             <th>team name</th>
             <th>take control</th>
-        </tr>
-        {%for team in teams%}
-        <tr {%if teamInControl==team.id%} style="background-color: {{team.color}};" {%endif%}>
+        {%endfor%}
+    </tr>
 
-            <td>
-                <p style="color:{{team.color}};">{{team.id}}</p>
+        {%for teamId in range(((teams|length)/2)|int)%}
+        <tr>
+
+            <td {%if teamInControl==teams[teamId].id%} style="background-color: {{teams[teamId].color}};" {%endif%}>
+                <p style="color:{{teams[teamId].color}};">{{teams[teamId].id}}</p>
             </td>
-            <td>
-                <p style="color:{{team.color}};">
-                    {{team.name}}</p>
+            <td {%if teamInControl==teams[teamId].id%} style="background-color: {{teams[teamId].color}};" {%endif%}>
+                <p style="color:{{teams[teamId].color}};">
+                    {{teams[teamId].name}}</p>
             </td>
-            <td>
+            <td {%if teamInControl==teams[teamId].id%} style="background-color: {{teams[teamId].color}};" {%endif%}>
                 <form action="/station-handler?game-id={{gameId}}&station-id={{stationId}}" method="post">
                     <button name="setStatus"
-                        style="visibility:show; background-color: {{team.color}}; height: 200px; width: 200px;">take
+                        style="visibility:show; background-color: {{teams[teamId].color}}; height: 200px; width: 200px;">take
                         control</button>
-                    <input name="teamId" type="hidden" value={{team.id}}>
+                    <input name="teamId" type="hidden" value={{teams[teamId].id}}>
+                </form>
+            </td>
+            
+            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%} style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
+                <p style="color:{{teams[(teams|length)-1-teamId].color}};">{{teams[(teams|length)-teamId-1].id}}</p>
+            </td>
+            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%} style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
+                <p style="color:{{teams[(teams|length)-teamId-1].color}};">
+                    {{teams[(teams|length)-teamId-1].name}}</p>
+            </td>
+            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%} style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
+                <form action="/station-handler?game-id={{gameId}}&station-id={{stationId}}" method="post">
+                    <button name="setStatus"
+                        style="visibility:visible; background-color: {{teams[(teams|length)-teamId-1].color}}; height: 200px; width: 200px;">take
+                        control</button>
+                    <input name="teamId" type="hidden" value={{teams[(teams|length)-teamId-1].id}}>
                 </form>
             </td>
         </tr>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/styles.css') }}">
+<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">
 <html>
 
 {% extends 'navigationBar.html'%}
@@ -40,7 +40,7 @@
             </td>
             <td>
                 <form action="/stations" method="post"> 
-                    <button name="removeStationId" style="visibility:show" value="{{station.id}}">remove</button>
+                    <button name="removeStationId" style="visibility:visible" value="{{station.id}}">remove</button>
                 </form>
             </td>
         </tr>
@@ -51,7 +51,7 @@
     <form action="/stations" method="post">
         enter station name: <input type="text" name="stations_name" required>
         enter points per min: <input type="number" name="stations_point" required>
-        <button name="add_team" style="visibility:show">enter</button>
+        <button name="add_team" style="visibility:visible">enter</button>
     </form>
     {{message}}
 </body>

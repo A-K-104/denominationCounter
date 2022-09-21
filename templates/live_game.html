@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/styles.css') }}">
+<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">
 
 <html>
 {% extends 'navigationBar.html'%}
@@ -28,7 +28,7 @@
             <td>
                 <p>
                 <form action="/live-game?game-id={{gameId}}" method="post">
-                    <button name="setStatus" style="visibility:show">enter station</button>
+                    <button name="setStatus" style="visibility:visible">enter station</button>
                     <input name="station-id" type="hidden" value={{station.id}}>
                 </form>
             </td>
