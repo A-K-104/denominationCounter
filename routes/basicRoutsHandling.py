@@ -3,10 +3,12 @@ import datetime
 from flask import Blueprint, render_template, request
 from werkzeug.utils import redirect
 import constance
+from classes.database.GameSession import GameSession
 
-from classes.games import Games
-from classes.stations import Stations
-from classes.teams import Teams
+from classes.database.Games import Games
+from classes.database.stations import Stations
+from classes.database.stationsTakeOvers import StationsTakeOvers
+from classes.database.teams import Teams
 
 basic_routs_handling = Blueprint('basic_routs_handling', __name__)
 db = constance.db
@@ -19,9 +21,39 @@ def baseRoute():
 
 @basic_routs_handling.route('/home', methods=['GET', 'POST'])
 def home():
+    game_session_name = None
+    method = 'create'
+    if request.method == "POST":
+        if request.form.__contains__("gameSessionName"):
+            if request.form.__contains__('create'):
+                if db.session.query(GameSession.name).filter_by(name=request.form["gameSessionName"]).first() is None:
+                    new_game = GameSession(name=request.form["gameSessionName"])
+                    db.session.add(new_game)
+            elif request.form.__contains__('edit'):
+                if db.session.query(GameSession.name).filter_by(name=request.form["gameSessionName"]).first() is None:
+                    game_session_name = GameSession.query.get(request.form["edit"])
+                    game_session_name.name = request.form["gameSessionName"]
+
+        elif request.form.__contains__("removeGameId"):
+            game = GameSession.query.get(request.form["removeGameId"])
+            db.session.delete(game)
+        elif request.form.__contains__("disableEnableGame"):
+            game = GameSession.query.get(request.form["disableEnableGame"])
+            game.active = not game.active
+        elif request.form.__contains__("manageGame"):
+            game_session_name = GameSession.query.get(request.form["manageGame"])
+            method = 'edit'
+        db.session.commit()
+
+    games_sessions = GameSession.query.all()
+    return render_template("home.html", gamesSessions=games_sessions, method=method, gameSessionName=game_session_name)
+
+
+@basic_routs_handling.route('/gameHomePage', methods=['GET', 'POST'])
+def game_pome_page():
     if request.args.__contains__("messages"):
-        return render_template("home.html", messages=request.args.get("messages"))
-    return render_template("home.html")
+        return render_template("gameHomePage.html", messages=request.args.get("messages"))
+    return render_template("gameHomePage.html")
 
 
 @basic_routs_handling.route('/teams', methods=['GET', 'POST'])

@@ -1,21 +1,82 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
+    <link rel="stylesheet" type="text/css" href="/styles/table.css">
+    <title class="title">Home page</title>
+</head>
+
 {% extends 'navigationBar.html'%}
 
 {% block content %}
 
 <body>
 
-    <h1>Home page</h1>
+<form class="section" action="/home" method="post">
+    <div class="container">
+        <h3 class="title"> Create game session</h3>
 
+        <div class="login-field">
+            <label class="field-label"><b>game session name</b></label>
+            <input name="gameSessionName" type="text" value="{{gameSessionName.name}}" autocomplete="off" required>
+        </div>
+        <br/><br>
 
+        <button name="{{method}}" value="{{gameSessionName.id}}">enter</button>
+    </div>
 
-    <form action="/log_to_game" method="post">
-        enter game id: <input type="number" name="game_id" required>
-        <button name="login" style="visibility:show">enter</button>
-    </form>
-    {{messages}}
+</form>
+
+<div class="section">
+    <div class="container">
+        <h3 class="title"> game session name table</h3>
+        <table class="statusTable">
+            <tr>
+                <th>game session name</th>
+                <th>enter</th>
+                <th>edit</th>
+                <th>enable</th>
+                <th>delete</th>
+            </tr>
+            {%for game in gamesSessions%}
+            <tr>
+            <td>
+                <p>
+                    {{game.name}}</p>
+            </td>
+            <td>
+                <button onclick="redirectPage({{game.id}})">enter session</button>
+
+            </td>
+            <td>
+                <form action="/home" method="post">
+                    <button name="manageGame" value="{{game.id}}">manage session</button>
+                </form>
+            </td>
+            <td>
+                <form action="/home" method="post">
+                    <button name="disableEnableGame" value="{{game.id}}">{{game.active}}</button>
+                </form>
+            </td>
+            <td>
+                <form action="/home" method="post">
+                    <button name="removeGameId" value="{{game.id}}">remove</button>
+                </form>
+            </td>
+            </tr>
+
+            {%endfor%}
+        </table>
+    </div>
+</div>
+{{message}}
 </body>
+<script>
+    function redirectPage(gameId) {
+        location.replace("/game?id=" + gameId)
+    }
+</script>
 {% endblock %}
 
 </html>

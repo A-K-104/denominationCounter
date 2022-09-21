@@ -2,9 +2,16 @@
   td,th {
     border-collapse:collapse;
     border:1px solid black; 
-    padding:10px; 
+    padding:10px;
+
   }
+  
 table,td,th {
     border: 1px solid black;
     border-collapse: collapse;
     }
+    .cell {
+      float: left;
+      margin: 5px;
+      border: 1px solid #ffffff
+  }

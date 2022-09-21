@@ -1,0 +1,33 @@
+#navbar {
+  width: 50em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+}
+
+.icon {
+  width: 3em;
+}
+
+.nav-link {
+    background: #62727b;
+    padding: .75em;
+    text-decoration: none;
+    color: #ffffff;
+    box-shadow: .2em .2em .25em -.1em #00000070;
+    border-radius: .4em;
+}
+
+.nav-link:hover {
+    background: #37474f;
+    padding: .75em;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.centerNav{
+    display: flex;
+    justify-content: center;
+}

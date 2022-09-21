@@ -2,7 +2,7 @@ import constance
 from routes.basicRoutsHandling import basic_routs_handling
 
 
-def creat():
+def create():
     db = constance.db
     app = constance.app
     app.register_blueprint(basic_routs_handling)
@@ -12,3 +12,7 @@ def creat():
         db.create_all()
 
     return app
+
+
+if __name__ == "__main__":
+    create().run(debug=True)

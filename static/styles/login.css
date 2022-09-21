@@ -1,0 +1,60 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+form {
+    border: 0.2em solid #f1f1f1;
+}
+
+h2.title {
+    display: flex;
+    justify-content: center;
+}
+
+input[type=text], input[type=password], input[type=email] {
+    width: 55%;
+    padding: 1em 1.4em;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+}
+
+
+
+.imgcontainer {
+    display: flex;
+    justify-content: center;
+}
+
+img.avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin: 3em auto;
+    max-width: 30em;
+}
+
+.login-field {
+    display: flex;
+    margin: 0.3em auto;
+    text-align: center;
+    width: 80%;
+}
+
+.error-label {
+    display: flex;
+    margin: 0.3em auto;
+    color: red;
+    text-align: center;
+}

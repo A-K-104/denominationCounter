@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+{% extends 'navigationBar.html'%}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/login.css">
+    <title class="title">Game home page</title>
+</head>
+<body>
+
+<form action="/log_to_game" method="post">
+    <div class="container">
+        <div class="login-field">
+            <label class="field-label"><b>enter game id</b></label>
+            <input type="number" name="game_id" placeholder="game id" required>
+        </div>
+        <button type="submit" name="login">enter</button>
+
+    </div>
+</form>
+{{messages}}
+</body>
+{% endblock %}
+
+</html>

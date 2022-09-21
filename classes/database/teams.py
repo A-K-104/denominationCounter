@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import session
 import constance
+from classes.database.GameSession import GameSession
 
 db = constance.db
 
@@ -11,6 +12,9 @@ class Teams(db.Model):
     name = db.Column(db.String(200), nullable=False)
     color = db.Column(db.String(200), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    session = db.Column(db.Integer, db.ForeignKey(GameSession.id))
+
 
     def __repr__(self):
         return '<Name %r>' % self.id

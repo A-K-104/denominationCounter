@@ -1,0 +1,93 @@
+
+
+.section {
+    border: 0.1em solid #f1f1f1;
+}
+
+h2.title {
+    display: flex;
+    justify-content: center;
+}
+
+input[type=text],input[type=url], input[type=number] {
+    width: 55%;
+    padding: 1em 1.4em;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+textarea {
+    width: 55%;
+    padding: 1em 1.4em;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+     resize: none;
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.imgcontainer {
+    display: flex;
+    justify-content: center;
+}
+
+img.avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin: 3em auto;
+    max-width: 40em;
+}
+
+.login-field {
+    display: flex;
+    margin: 0.3em auto;
+    text-align: center;
+    width: 80%;
+}
+
+.error-label {
+    display: flex;
+    margin: 0.3em auto;
+    color: red;
+    text-align: center;
+}
+
+table.statusTable {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: .2em .2em .25em -.1em #00000038;
+}
+
+.statusTable td, .statusTable th {
+    border: 0.1em solid #ddd;
+    padding: 0.5em
+}
+
+.statusTable tr:nth-child(even) {
+    background-color: #607d8b1E;
+}
+
+.statusTable tr:hover {
+    background-color: #62727b;
+    color: #ffffff;
+
+}
+
+.statusTable th {
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
+    text-align: left;
+    background-color: #37474f;
+    color: #ffffff;
+}
