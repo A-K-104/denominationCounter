@@ -1,27 +1,22 @@
 <!DOCTYPE html>
-<html>
-{% extends 'navigationBar.html'%}
-
-{% block content %}
+<html lang="en-US">
 <head>
     <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
     <link rel="stylesheet" type="text/css" href="/static/styles/login.css">
     <title class="title">Game home page</title>
 </head>
 <body>
+<h2 class="title">Game home page</h2>
 
-<form action="/log_to_game" method="post">
-    <div class="container">
-        <div class="login-field">
-            <label class="field-label"><b>enter game id</b></label>
-            <input type="number" name="game_id" placeholder="game id" required>
-        </div>
-        <button type="submit" name="login">enter</button>
+<button onclick="redirectPage('stations')">stations</button>
+<button onclick="redirectPage('teams')">teams</button>
+<button onclick="redirectPage('games')">games</button>
 
-    </div>
-</form>
-{{messages}}
 </body>
-{% endblock %}
+<script>
+    function redirectPage(path) {
+        location.assign(path + window.location.search)
+    }
+</script>
 
 </html>

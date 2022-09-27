@@ -9,9 +9,14 @@ h2.title {
     justify-content: center;
 }
 
-input[type=text],input[type=url], input[type=number] {
+input[type=text],input[type=url], input[type=number]{
     width: 55%;
     padding: 1em 1.4em;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+input[type=color]{
+    width: 55%;
     border: 1px solid #ccc;
     box-sizing: border-box;
 }

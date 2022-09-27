@@ -1,59 +1,80 @@
 <!DOCTYPE html>
-<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">
+<link rel="stylesheet" type="text/css" href="/static/styles/styles.css">
 <html>
-
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/tables.css">
+    <title class="title">Home page</title>
+</head>
 {% extends 'navigationBar.html'%}
 
 {% block content %}
 
 <body>
-    <h1>Stations page</h1>
-    <table>
-        <tr>
-            <th>station id</th>
-            <th>station name</th>
-            <th>station points</th>
-            <th>station team id</th>
-            <th>station take overtime</th>
-            <th>del</th>
-        </tr>
-        {%for station in stations%}
-        <tr>
-            <td>
-                <p>{{station.id}}</p>
-            </td>
-            <td>
-                <p>
-                    {{station.name}}</p>
-            </td>
-            <td>
-                <p>
-                    {{station.point}}</p>
-            </td>
-            <td>
-                <p>
-                    {{station.team}}</p>
-            </td>
-            <td>
-                <p>
-                    {{station.take_over_time}}</p>
-            </td>
-            <td>
-                <form action="/stations" method="post"> 
-                    <button name="removeStationId" style="visibility:visible" value="{{station.id}}">remove</button>
-                </form>
-            </td>
-        </tr>
-        {%endfor%}
-    </table>
+
+<div class="section">
+    <div class="container">
+        <h3 class="title">Stations page</h3>
+        <form action="/stations?id={{id}}" method="post">
+            <div class="login-field">
+                <label class="field-label"><b>station name</b></label>
+                <input name="stations_name" type="text" autocomplete="off" required>
+            </div>
+            <br/><br>
+            <div class="login-field">
+                <label class="field-label"><b>points per min</b></label>
+                <input name="add_team" type="number" autocomplete="off" required>
+            </div>
+            <br/><br>
+            <button name="add_team">enter</button>
+        </form>
+    </div>
+</div>
+<div class="section">
+    <div class="container">
+        <table class="statusTable">
+            <tr>
+                <th>station id</th>
+                <th>station name</th>
+                <th>station points</th>
+                <th>station team id</th>
+                <th>station take overtime</th>
+                <th>del</th>
+            </tr>
+            {%for station in stations%}
+            <tr>
+                <td>
+                    <p>{{station.id}}</p>
+                </td>
+                <td>
+                    <p>
+                        {{station.name}}</p>
+                </td>
+                <td>
+                    <p>
+                        {{station.point}}</p>
+                </td>
+                <td>
+                    <p>
+                        {{station.team}}</p>
+                </td>
+                <td>
+                    <p>
+                        {{station.take_over_time}}</p>
+                </td>
+                <td>
+                    <form action="/stations?id={{id}}" method="post">
+                        <button name="removeStationId" value="{{station.id}}">remove</button>
+                    </form>
+                </td>
+            </tr>
+            {%endfor%}
+        </table>
+    </div>
+</div>
 
 
-    <form action="/stations" method="post">
-        enter station name: <input type="text" name="stations_name" required>
-        enter points per min: <input type="number" name="stations_point" required>
-        <button name="add_team" style="visibility:visible">enter</button>
-    </form>
-    {{message}}
+{{message}}
 </body>
 {% endblock %}
 

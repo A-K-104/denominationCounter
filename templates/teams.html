@@ -1,46 +1,67 @@
 <!DOCTYPE html>
-<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">
-<html>
-
+<link rel="stylesheet" type="text/css" href="/static/styles/styles.css">
+<html lang="en-US">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/tables.css">
+    <title class="title">Home page</title>
+</head>
 {% extends 'navigationBar.html'%}
 
 {% block content %}
 
 <body>
 
-    <h1>Teams page</h1>
-    <table>
-        <tr>
-            <th>team id</th>
-            <th>team name</th>
-            <th>del</th>
-        </tr>
-        {%for team in teams%}
-        <tr>
-            <td>
-                <p style="color:{{team.color}};">{{team.id}}</p>
-            </td>
-            <td>
-                <p style="color:{{team.color}};">
-                    {{team.name}}</p>
-            </td>
-            <td>
-                <form action="/teams" method="post"> 
-                    <button name="removeTeamId" style="visibility:visible" value="{{team.id}}">remove</button>
-                </form>
-            </td>
-        </tr>
-        {%endfor%}
-    </table>
+<div class="section">
+    <div class="container">
+        <h3 class="title">Teams page</h3>
+        <form action="/teams?id={{id}}" method="post">
+            <div class="login-field">
+                <label class="field-label"><b>team name</b></label>
+                <input name="team_name" type="text" autocomplete="off" required>
+            </div>
+            <br/><br>
 
+            <div class="login-field">
+                <label class="field-label"><b>team color</b></label>
+                <input name="team_color" type="color" required>
+            </div>
+<!--            , enter team color: <input type="color" name="team_color" required>-->
+            <button name="add_team" style="visibility:visible">enter</button>
+        </form>
+    </div>
+</div>
+<div class="section">
+    <div class="container">
+        <table class="statusTable">
+            <tr>
+                <th>team id</th>
+                <th>team name</th>
+                <th>del</th>
+            </tr>
+            {%for team in teams%}
+            <tr>
+                <td>
+                    <p style="color:{{team.color}};">{{team.id}}</p>
+                </td>
+                <td>
+                    <p style="color:{{team.color}};">
+                        {{team.name}}</p>
+                </td>
+                <td>
+                    <form action="/teams?id={{id}}" method="post">
+                        <button name="removeTeamId" style="visibility:visible" value="{{team.id}}">remove</button>
+                    </form>
+                </td>
+            </tr>
+            {%endfor%}
+        </table>
+    </div>
+</div>
 
-    <form action="/teams" method="post">
-        enter team name: <input type="text" name="team_name" required>
-        , enter team color: <input type="color" name="team_color" required>
-        <button name="add_team" style="visibility:visible">enter</button>
-    </form>
-    {{message}}
+{{message}}
 </body>
-{% endblock %}
 
 </html>
+
+{% endblock %}
