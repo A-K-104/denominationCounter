@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">
-<html>
+<link rel="stylesheet" type="text/css" href="/static/styles/styles.css">
+<html lang="en-US">
 {% block content %}
 
 <body>
-    <h1>Live station {{stationId}}</h1>
-    <div>
+<h1>Live station {{stationId}}</h1>
+<div>
     <table>
         <tr>
 
-        {%for teamId in range(2)%}
+            {%for teamId in range(2)%}
             <th>team id</th>
             <th>team name</th>
             <th>take control</th>
-        {%endfor%}
-    </tr>
+            {%endfor%}
+        </tr>
 
         {%for teamId in range(((teams|length)/2)|int)%}
         <tr>
@@ -27,38 +27,44 @@
                     {{teams[teamId].name}}</p>
             </td>
             <td {%if teamInControl==teams[teamId].id%} style="background-color: {{teams[teamId].color}};" {%endif%}>
-                <form action="/station-handler?game-id={{gameId}}&station-id={{stationId}}" method="post">
+                <form action="/live-station?session-id={{sessionId}}&station-id={{stationId}}" method="post">
                     <button name="setStatus"
-                        style="visibility:show; background-color: {{teams[teamId].color}}; height: 200px; width: 200px;">take
-                        control</button>
-                    <input name="teamId" type="hidden" value={{teams[teamId].id}}>
+                            style="background-color: {{teams[teamId].color}}; height: 200px; width: 200px;"
+                            value={{teams[teamId].id}}>take
+                        >take
+                        control
+                    </button>
                 </form>
             </td>
-            
-            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%} style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
+
+            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%}
+                style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
                 <p style="color:{{teams[(teams|length)-1-teamId].color}};">{{teams[(teams|length)-teamId-1].id}}</p>
             </td>
-            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%} style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
+            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%}
+                style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
                 <p style="color:{{teams[(teams|length)-teamId-1].color}};">
                     {{teams[(teams|length)-teamId-1].name}}</p>
             </td>
-            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%} style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
-                <form action="/station-handler?game-id={{gameId}}&station-id={{stationId}}" method="post">
+            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%}
+                style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
+                <form action="/live-station?session-id={{sessionId}}&station-id={{stationId}}" method="post">
                     <button name="setStatus"
-                        style="background-color: {{teams[(teams|length)-teamId-1].color}}; height: 200px; width: 200px;">take
-                        control</button>
-                    <input name="teamId" type="hidden" value={{teams[(teams|length)-teamId-1].id}}>
+                            style="background-color: {{teams[(teams|length)-teamId-1].color}}; height: 200px; width: 200px;"
+                            value={{teams[(teams|length)-teamId-1].id}}>take
+                        control
+                    </button>
                 </form>
             </td>
         </tr>
         {%endfor%}
     </table>
 </div>
-    {{message}}
+{{message}}
 
-    <form id="test" action="/home" method="post">
-        Name * <input id="name" type="hidden"><span id='errName' class='error'>This is a required field</span>
-    </form>
+<form id="test" action="/home" method="post">
+    Name * <input id="name" type="hidden"><span id='errName' class='error'>This is a required field</span>
+</form>
 </body>
 {% endblock %}
 <!-- <script>

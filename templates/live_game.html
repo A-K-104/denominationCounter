@@ -1,43 +1,55 @@
 <!DOCTYPE html>
-<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">
+<!--<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">-->
 
-<html>
+<html lang="en-US">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/tables.css">
+    <title class="title">live game</title>
+</head>
 {% extends 'navigationBar.html'%}
 
 {% block content %}
 
 <body>
-   
-    <h1>Live Game {{gameId}}</h1>
-    <div>
-    <table>
-        <tr>
-            <th>station id</th>
-            <th>station name</th>
-            <th>enter</th>
-        </tr>
-        {%for station in stations%}
-        <tr>
-            <td>
-                <p>{{station.id}}</p>
-            </td>
-            <td>
-                <p>
-                    {{station.name}}</p>
-            </td>
-            <td>
-                <p>
-                <form action="/live-game?game-id={{gameId}}" method="post">
-                    <button name="setStatus" >enter station</button>
-                    <input name="station-id" type="hidden" value={{station.id}}>
-                </form>
-            </td>
-        </tr>
-        {%endfor%}
-    </table>
+<div class="section">
+    <div class="container">
+        <h3 class="title">Live Game {{gameId}}</h3>
+        <div>
+            <table class="statusTable">
+                <tr>
+                    <th>station id</th>
+                    <th>station name</th>
+                    <th>enter</th>
+                </tr>
+                {%for station in stations%}
+                <tr>
+                    <td>
+                        <p>{{station.id}}</p>
+                    </td>
+                    <td>
+                        <p>
+                            {{station.name}}</p>
+                    </td>
+                    <td>
+                        <p>
+                            <button onclick="redirectPage('/live-station?session-id={{gameId}}&station-id={{station.id}}')">
+                                enter station
+                            </button>
+                    </td>
+                </tr>
+                {%endfor%}
+            </table>
+        </div>
+    </div>
 </div>
-    {{message}}
+{{message}}
 </body>
+<script>
+    function redirectPage(path) {
+        location.assign(path)
+    }
+</script>
 {% endblock %}
 
 

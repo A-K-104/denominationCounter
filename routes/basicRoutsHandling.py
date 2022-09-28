@@ -1,5 +1,3 @@
-import datetime
-
 from flask import Blueprint, render_template, request
 from werkzeug.utils import redirect
 import constance
@@ -67,16 +65,16 @@ def games_menu():
 
 @basic_routs_handling.route('/teams', methods=['GET', 'POST'])
 def teams():
-    if not request.args.__contains__('id') or\
+    if not request.args.__contains__('id') or \
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
         return redirect("/")
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
     message = ""
     if request.method == "POST":
         if request.form.__contains__('team_name') and request.form.__contains__('team_color'):
-            if db.session.query(Teams).\
+            if db.session.query(Teams). \
                     filter_by(name=request.form['team_name'], session=request.args.get("id")).first() is None:
-                if db.session.query(Teams).\
+                if db.session.query(Teams). \
                         filter_by(color=request.form['team_color'], session=request.args.get("id")).first() is None:
                     new_teams = Teams(name=request.form['team_name'], color=request.form['team_color'])
                     game_session.teams.append(new_teams)
@@ -121,7 +119,7 @@ def old_games():
 
 @basic_routs_handling.route('/stations', methods=['GET', 'POST'])
 def stations():
-    if not request.args.__contains__('id') or\
+    if not request.args.__contains__('id') or \
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
         return redirect("/")
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
@@ -148,16 +146,38 @@ def stations():
 
 @basic_routs_handling.route('/live-game', methods=['GET', 'POST'])
 def live_game():
+    #   todo: added error message
     message = ""
-    if not request.args.__contains__("game-id"):
-        return redirect("/home?messages=missing_game_id")
-    if request.method == "POST":
-        if request.form.__contains__('station-id'):
-            return redirect(
-                f"/station-handler?station-id={request.form['station-id']}&game-id={request.args.get('game-id')}")
-    stations = Stations.query.order_by(Stations.id)
-    return render_template("live_game.html", stations=list(stations), message=message,
-                           gameId=request.args.get('game-id'))
+    if not request.args.__contains__("session-id") or \
+            db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
+        return redirect("/")
+    game_session = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
+    if multi_games_running(game_session.games) != -1:
+        return render_template("live_game.html", stations=list(game_session.stations), message=message,
+                               gameId=request.args['session-id'])
+    return redirect("/")
+
+
+@basic_routs_handling.route('/live-station', methods=['GET', 'POST'])
+def live_station():
+    print()
+    if not request.args.__contains__("session-id") or \
+            db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
+        return redirect("/")
+    game_session = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
+    game_id = multi_games_running(game_session.games)
+    if game_id != -1:
+
+        if request.method == "POST":
+            game = db.session.query(Games).filter_by(id=game_id).first()
+            game.stationsTakeOvers.append(
+                StationsTakeOvers(stationId=request.args['station-id'], teamId=request.form["setStatus"]))
+            db.session.commit()
+
+        return render_template("live_station.html", teams=list(game_session.teams),
+                               sessionId=request.args['session-id'],
+                               stationId=request.args['station-id'])
+    return redirect("/")
 
 
 @basic_routs_handling.route('/new-game', methods=['GET', 'POST'])
@@ -179,19 +199,30 @@ def games2():
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
         return redirect("/")
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
-    if multi_games_running(game_session.games):
+    if multi_games_running(game_session.games) == -1:
         return "bad"
     return "good"
 
 
-def multi_games_running(games: list) -> bool:
-    running_game: bool = False
+@basic_routs_handling.route('/enter-to-session', methods=['GET', 'POST'])
+def enter_to_session():
+    print("asdf")
+    if not request.form.__contains__('gameSessionId') or \
+            db.session.query(GameSession).filter_by(id=request.form["gameSessionId"]).first() is None:
+        return redirect("/")
+    game_session = db.session.query(GameSession).filter_by(id=request.form["gameSessionId"]).first()
+    if multi_games_running(game_session.games) != -1:
+        return redirect(f"/live-game?session-id={game_session.id}")
+
+
+def multi_games_running(games: list) -> int:
+    running_game: int = -1
     for game in games:
         if game.active:
-            if running_game:
-                return True
-            running_game = True
-    return False
+            if running_game != -1:
+                return -1
+            running_game = game.id
+    return running_game
 
 # @basic_routs_handling.route('/game-is-alive', methods=['GET'])
 # def game_is_alive() -> tuple[str, int]:
