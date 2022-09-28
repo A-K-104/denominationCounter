@@ -5,12 +5,18 @@
     <link rel="stylesheet" type="text/css" href="/static/styles/login.css">
     <title class="title">Game home page</title>
 </head>
+{% extends 'navigationBar.html'%}
+
+{% block content %}
+
 <body>
 <h2 class="title">Game home page</h2>
 
 <button onclick="redirectPage('stations')">stations</button>
 <button onclick="redirectPage('teams')">teams</button>
-<button onclick="redirectPage('games')">games</button>
+<button onclick="redirectPage('old-games')">old games</button>
+<button onclick="redirectPage('new-game')">new game</button>
+<button onclick="redirectPage('run-game')">running game</button>
 
 </body>
 <script>
@@ -20,3 +26,4 @@
 </script>
 
 </html>
+{% endblock %}

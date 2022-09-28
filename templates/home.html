@@ -3,11 +3,9 @@
 
 <head>
     <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
-    <link rel="stylesheet" type="text/css" href="/styles/table.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/tables.css">
     <title class="title">Home page</title>
 </head>
-
-{% extends 'navigationBar.html'%}
 
 {% block content %}
 
@@ -46,7 +44,7 @@
                     {{game.name}}</p>
             </td>
             <td>
-                <button onclick="redirectPage({{game.id}})">enter session</button>
+                <button onclick="redirectPage('{{game.id}}')">enter session</button>
 
             </td>
             <td>
@@ -74,7 +72,7 @@
 </body>
 <script>
     function redirectPage(gameId) {
-        location.replace("/game?id=" + gameId)
+        location.replace("/games-menu?id=" + gameId)
     }
 </script>
 {% endblock %}

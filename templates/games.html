@@ -43,12 +43,12 @@
             </td>
             <td>
                 <form action="/games" method="post">
-                    <button name="removeGameId" style="visibility:visible" value="{{game.id}}">remove</button>
+                    <button name="removeGameId"  value="{{game.id}}">remove</button>
                 </form>
             </td>
             <td>
                 <form action="/games" method="post">
-                    <button name="setStatus" style="visibility:visible">active/deactivate</button>
+                    <button name="setStatus" >active/deactivate</button>
                     <input name="gameId" type="hidden" value={{game.id}}>
                 </form>
             </td>
@@ -59,7 +59,7 @@
 
     <form action="/games" method="post">
         new game name:<input type="text" name="game_name" required>
-        <button name="add_team" style="visibility:visible">enter</button>
+        <button name="add_team" >enter</button>
     </form>
     {{message}}
 </body>

@@ -56,13 +56,13 @@ def game_pome_page():
     return render_template("enterPage.html")
 
 
-@basic_routs_handling.route('/game', methods=['GET', 'POST'])
-def game():
-    if not request.args.__contains__('id') or\
+@basic_routs_handling.route('/games-menu', methods=['GET', 'POST'])
+def games_menu():
+    if not request.args.__contains__('id') or \
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
         return redirect("/")
 
-    return render_template("gameHomePage.html")
+    return render_template("gameHomePage.html", id=request.args.get("id"))
 
 
 @basic_routs_handling.route('/teams', methods=['GET', 'POST'])
@@ -109,54 +109,14 @@ def log_to_game():
     return redirect(f"/home?messages=wrong_method")
 
 
-@basic_routs_handling.route('/games', methods=['GET', 'POST'])
-def games():
-    message = ""
-    if request.method == "POST":
-        if request.form.__contains__('game_name'):
-            if db.session.query(Games).filter_by(name=request.form['game_name']).first() is None:
-                new_game = Games(name=request.form['game_name'])
-                db.session.add(new_game)
-                db.session.commit()
-            else:
-                message = "name already exist"
-        elif request.form.__contains__('setStatus') and request.form.__contains__('gameId'):
-            games = Games.query.order_by(Games.id)
-            stations = Stations.query.order_by(Stations.id)
-            for game in games:
-                if game.active:
-                    for station in stations:
-                        arr_of_game: dict = game.points
-                        if not station.team == -1:
-                            arr_of_game = setPoints(arr_of_game, station)
-                            game.points = None
-                            db.session.commit()
-
-                        game.points = arr_of_game
-                        station.team = -1
-                        station.take_over_time = datetime.datetime.utcnow()
-                game.active = (str(game.id) == request.form['gameId'])
-
-            db.session.commit()
-        elif request.form.__contains__('removeGameId'):
-            print(f'removed: {request.form["removeGameId"]}')
-            game = Games.query.get(request.form['removeGameId'])
-            if game is not None:
-                db.session.delete(game)
-                db.session.commit()
-        else:
-            message = "failed to get par"
-    games = Games.query.order_by(Games.id)
-    games = list(games)
-    for i in range(len(games)):
-        for team in list(games[i].points):
-            if games[i].points.get(team) is not None:
-                point = 0
-                for local in games[i].points.get(team):
-                    point += games[i].points.get(team).get(local)
-                games[i].points[team]["total"] = point
-    teams = Teams.query.order_by(Teams.id)
-    return render_template("games.html", games=list(games), message=message, points="games_score", teams=list(teams))
+@basic_routs_handling.route('/old-games', methods=['GET', 'POST'])
+def old_games():
+    if not request.args.__contains__('id') or \
+            db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
+        return redirect("/")
+    game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
+    # todo: calc game score.
+    return render_template("games.html", games=list(game_session.games))
 
 
 @basic_routs_handling.route('/stations', methods=['GET', 'POST'])
@@ -168,7 +128,8 @@ def stations():
     message = ""
     if request.method == "POST":
         if request.form.__contains__('stations_name') and request.form.__contains__('stations_point'):
-            if db.session.query(Stations).filter_by(name=request.form['stations_name'], session=request.args.get("id")).first() is None:
+            if db.session.query(Stations).filter_by(name=request.form['stations_name'],
+                                                    session=request.args.get("id")).first() is None:
                 new_stations = Stations(name=request.form['stations_name'], point=request.form['stations_point'])
                 game_session.stations.append(new_stations)
                 db.session.commit()
@@ -199,60 +160,38 @@ def live_game():
                            gameId=request.args.get('game-id'))
 
 
-def setPoints(arr_of_game, station):
-    if arr_of_game is not None:
-        if arr_of_game.get(str(station.team)) is None:
-            arr_of_game.update({str(station.team): {str(station.id): 0}})
-    else:
-        arr_of_game = {str(station.team): {str(station.id): 0}}
-    added_points = (datetime.datetime.utcnow() - station.take_over_time).seconds * station.point / 60
-    if arr_of_game.get(str(station.team)).get(str(station.id)) is None:
-        updatedVal = added_points
-    else:
-        updatedVal = arr_of_game.get(str(station.team)).get(str(station.id)) + added_points
-    station.take_over_time = datetime.datetime.utcnow()
-    temp_update = arr_of_game.get(str(station.team))
-    temp_update.update({str(station.id): updatedVal})
-    arr_of_game.update({str(station.team): temp_update})
-    return arr_of_game
+@basic_routs_handling.route('/new-game', methods=['GET', 'POST'])
+def games1():
+    if not request.args.__contains__('id') or \
+            db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
+        return redirect("/")
+    game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
+    for game in game_session.games:
+        game.active = False
+    game_session.games.append(Games(active=True))
+    db.session.commit()
+    return redirect(f"/run-game?id={game_session.id}")
 
 
-@basic_routs_handling.route('/station-handler', methods=['GET', 'POST'])
-def station_handler():
-    message = ""
+@basic_routs_handling.route('/run-game', methods=['GET', 'POST'])
+def games2():
+    if not request.args.__contains__('id') or \
+            db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
+        return redirect("/")
+    game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
+    if multi_games_running(game_session.games):
+        return "bad"
+    return "good"
 
-    if not request.args.__contains__("game-id"):
-        return redirect("/home?messages=missing_game_id")
-    if not request.args.__contains__("station-id"):
-        return redirect("/home?messages=missing_game_id")
-    station = Stations.query.get(request.args['station-id'])
-    game = Games.query.get(request.args['game-id'])
-    if game is None:
-        return redirect("/home?messages=game_is_none")
-    if station is None:
-        return redirect("/home?messages=station_is_none")
-    if request.method == "POST":
-        if request.form.__contains__('teamId'):
-            if db.session.query(Teams).filter_by(id=request.form['teamId']).first() is None:
-                return redirect("/home?messages=failed_to_find_team")
-            if not game.active:
-                return redirect("/home?messages=game_is_not_active")
-            if not station.team == -1:
-                arr_of_game: dict = game.points
-                arr_of_game = setPoints(arr_of_game, station)
-                game.points = None
-                db.session.commit()
 
-                game.points = arr_of_game
-                db.session.commit()
-
-            station.team = request.form['teamId']
-            db.session.commit()
-    teams = Teams.query.order_by(Teams.id)
-    return render_template("live_station.html", teams=list(teams), message=message,
-                           teamInControl=station.team,
-                           gameId=request.args.get('game-id'),
-                           stationId=request.args.get('station-id'))
+def multi_games_running(games: list) -> bool:
+    running_game: bool = False
+    for game in games:
+        if game.active:
+            if running_game:
+                return True
+            running_game = True
+    return False
 
 # @basic_routs_handling.route('/game-is-alive', methods=['GET'])
 # def game_is_alive() -> tuple[str, int]:

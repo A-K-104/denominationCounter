@@ -23,7 +23,7 @@
             <br/><br>
             <div class="login-field">
                 <label class="field-label"><b>points per min</b></label>
-                <input name="add_team" type="number" autocomplete="off" required>
+                <input name="stations_point" type="number" autocomplete="off" value="1" required>
             </div>
             <br/><br>
             <button name="add_team">enter</button>
@@ -37,8 +37,6 @@
                 <th>station id</th>
                 <th>station name</th>
                 <th>station points</th>
-                <th>station team id</th>
-                <th>station take overtime</th>
                 <th>del</th>
             </tr>
             {%for station in stations%}
@@ -53,14 +51,6 @@
                 <td>
                     <p>
                         {{station.point}}</p>
-                </td>
-                <td>
-                    <p>
-                        {{station.team}}</p>
-                </td>
-                <td>
-                    <p>
-                        {{station.take_over_time}}</p>
                 </td>
                 <td>
                     <form action="/stations?id={{id}}" method="post">
