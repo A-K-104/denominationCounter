@@ -176,7 +176,8 @@ def live_station():
 
         return render_template("live_station.html", teams=list(game_session.teams),
                                sessionId=request.args['session-id'],
-                               stationId=request.args['station-id'])
+                               stationId=request.args['station-id'],
+                               teamInControl=int(team_in_control(game_id)))
     return redirect("/")
 
 
@@ -223,6 +224,12 @@ def multi_games_running(games: list) -> int:
                 return -1
             running_game = game.id
     return running_game
+
+
+def team_in_control(game: int):
+    print()
+    return db.session.query(StationsTakeOvers).filter_by(game=game)\
+        .order_by(StationsTakeOvers.date_created.desc()).first().teamId
 
 # @basic_routs_handling.route('/game-is-alive', methods=['GET'])
 # def game_is_alive() -> tuple[str, int]:
