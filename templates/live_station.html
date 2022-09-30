@@ -6,7 +6,7 @@
 <body>
 <h1>Live station {{stationId}}</h1>
 <div>
-    <table>
+    <table id="ta">
         <tr>
 
             {%for teamId in range(2)%}
@@ -61,27 +61,27 @@
     </table>
 </div>
 {{message}}
-
-<form id="test" action="/home" method="post">
-    Name * <input id="name" type="hidden"><span id='errName' class='error'>This is a required field</span>
-</form>
 </body>
 {% endblock %}
-<!-- <script>
+<script>
     const interval = setInterval(function () {
-        fetch('/game-is-alive?game-id={{gameId}}')
+        fetch('/game-is-alive'+ window.location.search)
             .then((response) => {
                 console.log(response)
-                if (response.code != 200) {
-                    // alert("The game was ended");
+                // debugger
+                const table = document.querySelector("#ta");
+                if (response.status === 202) {
+                    table.hidden = false
 
-                    document.getElementById('test').onsubmit = function () {
-                        return true;
-                    }
+                    let children = table.children
+                    Array.from(children[0].children).forEach(child =>
+                        Array.from(child.children).forEach(subChild =>
+                            subChild.style.background = "#FFFFFF")
+                    )
                 }
             })
 
-    }, 5000);
-</script> -->
+    }, 2000);
+</script>
 
 </html>
