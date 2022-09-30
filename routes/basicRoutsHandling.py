@@ -253,6 +253,7 @@ def enter_to_session():
     game_session = db.session.query(GameSession).filter_by(id=request.form["gameSessionId"]).first()
     if multi_games_running(game_session.games) is not None:
         return redirect(f"/live-game?session-id={game_session.id}")
+    return redirect("/")
 
 
 @basic_routs_handling.route('/game-is-alive', methods=['GET'])
