@@ -257,7 +257,7 @@ def enter_to_session():
 
 
 @basic_routs_handling.route('/game-is-alive', methods=['GET'])
-def game_is_alive() -> tuple[str, int]:
+def game_is_alive() -> (str, int):
 
     if not request.args.__contains__("session-id") or \
             db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
