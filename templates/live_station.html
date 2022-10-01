@@ -45,6 +45,9 @@
 </body>
 {% endblock %}
 <script>
+    {%if connected%}
+        alert("station already connected")
+    {% endif %}
     const interval = setInterval(function () {
         fetch('/game-is-alive' + window.location.search)
             .then((response) => {

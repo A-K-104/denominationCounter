@@ -163,6 +163,16 @@ def live_game():
 @basic_routs_handling.route('/live-station', methods=['GET'])
 def live_station():
     game_id, game_session = get_game_id_from_re(request)
+    station: Stations = db.session.query(Stations).filter_by(id=request.args.get("station-id")).first()
+    connected = True
+
+    if not (station.connected and (datetime.utcnow() - station.last_ping).seconds / 60 < 2)\
+            or request.args.__contains__("alerted"):
+        station.connected = True
+        station.last_ping = datetime.utcnow()
+        db.session.commit()
+        connected = False
+
     team_in_con_id = -1
     if game_id is not None:
         team_in_con_id = int(team_in_control(game_id, int(request.args['station-id'])))
@@ -171,7 +181,7 @@ def live_station():
     return render_template("live_station.html", teams=list(game_session.teams),
                            sessionId=request.args['session-id'],
                            stationId=request.args['station-id'],
-                           teamInControl=team_in_con, teamColor="#fffff")
+                           teamInControl=team_in_con, connected=connected)
 
 
 @basic_routs_handling.route('/live-station/takeover', methods=['GET'])
@@ -186,7 +196,8 @@ def live_station1():
         game.stationsTakeOvers.append(
             StationsTakeOvers(stationId=request.args['station-id'], teamId=request.args["team-id"]))
         db.session.commit()
-        return redirect(f'/live-station?session-id={game_session.id}&station-id={request.args["station-id"]}')
+        return redirect(f'/live-station?session-id={game_session.id}'
+                        f'&station-id={request.args["station-id"]}&alerted=true')
     return redirect('/')
 
 
@@ -256,16 +267,20 @@ def enter_to_session():
 
 @basic_routs_handling.route('/game-is-alive', methods=['GET'])
 def game_is_alive() -> (str, int):
-    if not request.args.__contains__("session-id") or \
-            db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
+    if not request.args.__contains__("session-id") or not request.args.__contains__("station-id"):
         return "false", 400
 
-    if not request.args.__contains__("station-id") or \
-            db.session.query(Stations).filter_by(id=request.args["station-id"],
-                                                 session=request.args["session-id"]).first() is None:
+    game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
+    station: Stations = db.session.query(Stations).filter_by(id=request.args["station-id"], session=request.args["session-id"]).first()
+
+    if station is None or game_session is None:
         return "false", 400
 
-    game_session = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
+    station.last_ping = datetime.utcnow()
+    if not station.connected:
+        station.connected = True
+    db.session.commit()
+
     if len(game_session.games) > 0 and game_session.games[-1].date_ended is None:
 
         team = team_in_control(game_session.games[-1], int(request.args["station-id"]))

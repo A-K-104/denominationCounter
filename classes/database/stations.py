@@ -13,7 +13,8 @@ class Stations(db.Model):
     name = db.Column(db.String(200), nullable=False)
     point = db.Column(db.Integer(), default=0, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
-
+    connected = db.Column(db.Boolean, default=False, nullable=False)
+    last_ping = db.Column(db.DateTime, default=datetime.utcnow)
     session = db.Column(db.Integer, db.ForeignKey(GameSession.id))
 
 
