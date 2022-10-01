@@ -246,7 +246,6 @@ def running_game_get_live():
 
 @basic_routs_handling.route('/enter-to-session', methods=['GET', 'POST'])
 def enter_to_session():
-    print("asdf")
     if not request.form.__contains__('gameSessionId') or \
             db.session.query(GameSession).filter_by(id=request.form["gameSessionId"]).first() is None:
         return redirect("/")
