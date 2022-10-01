@@ -11,6 +11,7 @@
         <tr>
             <td class="team">
                 <button name="setStatus"
+                        id="{{teams[teamId].id}}"
                         {%if teamInControl.id==teams[teamId].id %}
                         class="button-on"
                         {%else%}
@@ -24,6 +25,7 @@
             </td>
             <td class="team">
                 <button name="setStatus"
+                        id="{{teams[(teams|length)-1-teamId].id}}"
                         {%if teamInControl.id==teams[(teams|length)-1-teamId].id %}
                         class="button-on"
                         {%else%}
@@ -47,13 +49,36 @@
         fetch('/game-is-alive' + window.location.search)
             .then((response) => {
                 console.log(response)
-                // if (response.status === 202) {
-                //
-                //     document.body.style.background = "#FFFFFF"
-                // }
-                // else {
-                //     document.body.style.background = "#cc8899"
-                // }
+                response.json().then(data => {
+                    let selected = document.querySelectorAll(".button-on")
+                    if (response.status === 202) {
+                        document.body.style.background = "#FFFFFF"
+                        selected.forEach(element => {
+                            element.classList.add('button-off');
+                            element.classList.remove('button-on');
+                        })
+                    } else {
+                        document.body.style.background = data["color"]
+                        if (selected.length > 0) {
+                            selected.forEach(element => {
+
+                                if (element.id !== data["teamId"].toString()) {
+                                    element.classList.add('button-off');
+                                    element.classList.remove('button-on');
+
+                                    let newSelected = document.getElementById(data["teamId"])
+                                    newSelected.classList.add('button-on');
+                                    newSelected.classList.remove('button-off');
+                                }
+                            })
+                        } else {
+                            let newSelected = document.getElementById(data["teamId"])
+                            newSelected.classList.add('button-on');
+                            newSelected.classList.remove('button-off');
+                        }
+                    }
+                });
+
             })
 
     }, 2000);

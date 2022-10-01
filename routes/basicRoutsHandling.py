@@ -165,7 +165,7 @@ def live_station():
     game_id, game_session = get_game_id_from_re(request)
     team_in_con_id = -1
     if game_id is not None:
-        team_in_con_id = int(team_in_control(game_id.id, int(request.args['station-id'])))
+        team_in_con_id = int(team_in_control(game_id, int(request.args['station-id'])))
     team_in_con = db.session.query(Teams).filter_by(id=team_in_con_id, session=game_session.id).first()
 
     return render_template("live_station.html", teams=list(game_session.teams),
@@ -266,14 +266,22 @@ def game_is_alive() -> (str, int):
         return "false", 400
 
     game_session = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
-
     if len(game_session.games) > 0 and game_session.games[-1].date_ended is None:
-        return "true", 200
+
+        team = team_in_control(game_session.games[-1], int(request.args["station-id"]))
+        found_team: Teams = db.session.query(Teams).filter_by(id=team, session=request.args["session-id"]).first()
+
+        if found_team is not None:
+            team_color: str = found_team.color
+        else:
+            team_color = "#FFFFFF"
+
+        return {"color": team_color, "teamId": team}, 200
     return "false", 202
 
 
 def multi_games_running(games: list) -> None or Games:
-    running_game: Games = None
+    running_game: Games or None = None
     for game in games:
         if game.active:
             if running_game is not None:
@@ -282,8 +290,8 @@ def multi_games_running(games: list) -> None or Games:
     return running_game
 
 
-def team_in_control(game: int, station_id: int):
-    team_in = db.session.query(StationsTakeOvers).filter_by(game=game, stationId=station_id) \
+def team_in_control(game: Games, station_id: int):
+    team_in = db.session.query(StationsTakeOvers).filter_by(game=game.id, stationId=station_id) \
         .order_by(StationsTakeOvers.date_created.desc()).first()
 
     if team_in is not None:
@@ -321,7 +329,7 @@ def get_list_of_take_overs_per_station(station: Stations, take_overs: list) -> l
 def station_calc(teams: list, station: Stations, take_overs: list,
                  game_ended: datetime) -> None or dict:
     result: dict = {}
-    last_take_over: datetime = None
+    last_take_over: datetime or None = None
     for team in teams:
         result[team.id] = 0
     take_overs = get_list_of_take_overs_per_station(station, take_overs)
