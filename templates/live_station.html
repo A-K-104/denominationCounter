@@ -1,60 +1,39 @@
 <!DOCTYPE html>
-<link rel="stylesheet" type="text/css" href="/static/styles/styles.css">
+<link rel="stylesheet" type="text/css" href="/static/styles/station.css">
 <html lang="en-US">
 {% block content %}
 
-<body>
-<h1>Live station {{stationId}}</h1>
-<div>
+<body style="background: {{teamInControl.color}}">
+<div class="container">
+    <h2 class="header">Live station {{stationId}}</h2>
     <table id="ta">
-        <tr>
-
-            {%for teamId in range(2)%}
-            <th>team id</th>
-            <th>team name</th>
-            <th>take control</th>
-            {%endfor%}
-        </tr>
-
         {%for teamId in range(((teams|length)/2)|int)%}
         <tr>
-
-            <td {%if teamInControl==teams[teamId].id%} style="background-color: {{teams[teamId].color}};" {%endif%}>
-                <p style="color:{{teams[teamId].color}};">{{teams[teamId].id}}</p>
+            <td class="team">
+                <button name="setStatus"
+                        {%if teamInControl.id==teams[teamId].id %}
+                        class="button-on"
+                        {%else%}
+                        class="button-off"
+                        {%endif%}
+                        style="background-color: {{teams[teamId].color}};"
+                        value={{teams[teamId].id}}
+                        onclick="redirectPage('/live-station/takeover?session-id={{sessionId}}&station-id={{stationId}}&team-id={{teams[teamId].id}}')">
+                    {{teams[teamId].name}}
+                </button>
             </td>
-            <td {%if teamInControl==teams[teamId].id%} style="background-color: {{teams[teamId].color}};" {%endif%}>
-                <p style="color:{{teams[teamId].color}};">
-                    {{teams[teamId].name}}</p>
-            </td>
-            <td {%if teamInControl==teams[teamId].id%} style="background-color: {{teams[teamId].color}};" {%endif%}>
-                <form action="/live-station?session-id={{sessionId}}&station-id={{stationId}}" method="post">
-                    <button name="setStatus"
-                            style="background-color: {{teams[teamId].color}}; height: 200px; width: 200px;"
-                            value={{teams[teamId].id}}>take
-                        >take
-                        control
-                    </button>
-                </form>
-            </td>
-
-            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%}
-                style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
-                <p style="color:{{teams[(teams|length)-1-teamId].color}};">{{teams[(teams|length)-teamId-1].id}}</p>
-            </td>
-            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%}
-                style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
-                <p style="color:{{teams[(teams|length)-teamId-1].color}};">
-                    {{teams[(teams|length)-teamId-1].name}}</p>
-            </td>
-            <td {%if teamInControl==teams[(teams|length)-1-teamId].id%}
-                style="background-color: {{teams[(teams|length)-1-teamId].color}};" {%endif%}>
-                <form action="/live-station?session-id={{sessionId}}&station-id={{stationId}}" method="post">
-                    <button name="setStatus"
-                            style="background-color: {{teams[(teams|length)-teamId-1].color}}; height: 200px; width: 200px;"
-                            value={{teams[(teams|length)-teamId-1].id}}>take
-                        control
-                    </button>
-                </form>
+            <td class="team">
+                <button name="setStatus"
+                        {%if teamInControl.id==teams[(teams|length)-1-teamId].id %}
+                        class="button-on"
+                        {%else%}
+                        class="button-off"
+                        {%endif%}
+                        style="background-color: {{teams[(teams|length)-teamId-1].color}};"
+                        value={{teams[(teams|length)-teamId-1].id}}
+                        onclick="redirectPage('/live-station/takeover?session-id={{sessionId}}&station-id={{stationId}}&team-id={{teams[(teams|length)-1-teamId].id}}')">
+                    {{teams[(teams|length)-teamId-1].name}}
+                </button>
             </td>
         </tr>
         {%endfor%}
@@ -65,23 +44,23 @@
 {% endblock %}
 <script>
     const interval = setInterval(function () {
-        fetch('/game-is-alive'+ window.location.search)
+        fetch('/game-is-alive' + window.location.search)
             .then((response) => {
                 console.log(response)
-                // debugger
-                const table = document.querySelector("#ta");
-                if (response.status === 202) {
-                    table.hidden = false
-
-                    let children = table.children
-                    Array.from(children[0].children).forEach(child =>
-                        Array.from(child.children).forEach(subChild =>
-                            subChild.style.background = "#FFFFFF")
-                    )
-                }
+                // if (response.status === 202) {
+                //
+                //     document.body.style.background = "#FFFFFF"
+                // }
+                // else {
+                //     document.body.style.background = "#cc8899"
+                // }
             })
 
     }, 2000);
+
+    function redirectPage(path) {
+        location.replace(path)
+    }
 </script>
 
 </html>

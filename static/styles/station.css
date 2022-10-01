@@ -1,0 +1,40 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin: 3em auto;
+    max-width: 40em;
+}
+
+.header {
+    text-shadow: 0 0 4px white, 0 0 8px white;
+}
+
+
+.team {
+    align-items: center;
+    padding: .5em;
+}
+
+.team button {
+    border: none;
+    font-weight: bold;
+    font-size: 25px;
+    border-radius: 50%;
+    text-shadow: 0 0 6px white, 0 0 10px white;
+    height: 200px;
+    width: 200px;
+    text-transform: capitalize;
+}
+
+.button-off  {
+    box-shadow: 0 0 13px rgba(0, 0, 0, 15);
+}
+
+.button-on {
+    box-shadow: 0 0 9px 9px white;
+}
+
+.team p {
+  text-align: center;
+}

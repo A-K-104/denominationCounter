@@ -10,6 +10,7 @@ from classes.database.stationsTakeOvers import StationsTakeOvers
 from classes.database.teams import Teams
 
 basic_routs_handling = Blueprint('basic_routs_handling', __name__)
+app = constance.app
 db = constance.db
 
 
@@ -155,38 +156,38 @@ def live_game():
             db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
         return redirect("/")
     game_session = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
-    if multi_games_running(game_session.games) is not None:
-        return render_template("live_game.html", stations=list(game_session.stations), message=message,
-                               gameId=request.args['session-id'])
-    return redirect("/")
+    return render_template("live_game.html", stations=list(game_session.stations), message=message,
+                           gameId=request.args['session-id'])
 
 
-@basic_routs_handling.route('/live-station', methods=['GET', 'POST'])
+@basic_routs_handling.route('/live-station', methods=['GET'])
 def live_station():
-    if not request.args.__contains__("session-id") or \
-            db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
-        return redirect("/")
-
-    if not request.args.__contains__("station-id") or \
-            db.session.query(Stations).filter_by(id=request.args["station-id"],
-                                                 session=request.args["session-id"]).first() is None:
-        return redirect("/")
-
-    game_session = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
-    game_id = multi_games_running(game_session.games)
+    game_id, game_session = get_game_id_from_re(request)
+    team_in_con_id = -1
     if game_id is not None:
+        team_in_con_id = int(team_in_control(game_id.id, int(request.args['station-id'])))
+    team_in_con = db.session.query(Teams).filter_by(id=team_in_con_id, session=game_session.id).first()
 
-        if request.method == "POST":
-            game = db.session.query(Games).filter_by(id=game_id.id).first()
-            game.stationsTakeOvers.append(
-                StationsTakeOvers(stationId=request.args['station-id'], teamId=request.form["setStatus"]))
-            db.session.commit()
+    return render_template("live_station.html", teams=list(game_session.teams),
+                           sessionId=request.args['session-id'],
+                           stationId=request.args['station-id'],
+                           teamInControl=team_in_con, teamColor="#fffff")
 
-        return render_template("live_station.html", teams=list(game_session.teams),
-                               sessionId=request.args['session-id'],
-                               stationId=request.args['station-id'],
-                               teamInControl=int(team_in_control(game_id.id, int(request.args['station-id']))))
-    return redirect("/")
+
+@basic_routs_handling.route('/live-station/takeover', methods=['GET'])
+def live_station1():
+
+    game_id, game_session = get_game_id_from_re(request)
+
+    if game_id is not None:
+        if not request.args.__contains__("team-id"):
+            return redirect('/')
+        game = db.session.query(Games).filter_by(id=game_id.id).first()
+        game.stationsTakeOvers.append(
+            StationsTakeOvers(stationId=request.args['station-id'], teamId=request.args["team-id"]))
+        db.session.commit()
+        return redirect(f'/live-station?session-id={game_session.id}&station-id={request.args["station-id"]}')
+    return redirect('/')
 
 
 @basic_routs_handling.route('/new-game', methods=['GET', 'POST'])
@@ -250,14 +251,11 @@ def enter_to_session():
             db.session.query(GameSession).filter_by(id=request.form["gameSessionId"]).first() is None:
         return redirect("/")
     game_session = db.session.query(GameSession).filter_by(id=request.form["gameSessionId"]).first()
-    if multi_games_running(game_session.games) is not None:
-        return redirect(f"/live-game?session-id={game_session.id}")
-    return redirect("/")
+    return redirect(f"/live-game?session-id={game_session.id}")
 
 
 @basic_routs_handling.route('/game-is-alive', methods=['GET'])
 def game_is_alive() -> (str, int):
-
     if not request.args.__contains__("session-id") or \
             db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
         return "false", 400
@@ -284,9 +282,10 @@ def multi_games_running(games: list) -> None or Games:
     return running_game
 
 
-def team_in_control(game: int, station_id:int):
+def team_in_control(game: int, station_id: int):
     team_in = db.session.query(StationsTakeOvers).filter_by(game=game, stationId=station_id) \
         .order_by(StationsTakeOvers.date_created.desc()).first()
+
     if team_in is not None:
         return team_in.teamId
     return -1
@@ -305,7 +304,7 @@ def calc_game(game_session: GameSession, game: Games) -> None or dict:
 
     for station in game_session.stations:
         sub_result = station_calc(game_session.teams, station,
-                                  game.stationsTakeOvers, game.date_created, game_ended)
+                                  game.stationsTakeOvers, game_ended)
         for team in game_session.teams:
             result[team.id] += sub_result[team.id]
     return result
@@ -319,20 +318,37 @@ def get_list_of_take_overs_per_station(station: Stations, take_overs: list) -> l
     return new_take_over
 
 
-def station_calc(teams: list, station: Stations,
-                 take_overs: list, last_take_over: datetime,
+def station_calc(teams: list, station: Stations, take_overs: list,
                  game_ended: datetime) -> None or dict:
     result: dict = {}
-
+    last_take_over: datetime = None
     for team in teams:
         result[team.id] = 0
     take_overs = get_list_of_take_overs_per_station(station, take_overs)
     if len(take_overs) > 0:
         for take_over in take_overs:
             if result.__contains__(take_over.teamId):
-                result[take_over.teamId] += (take_over.date_created - last_take_over).seconds / 60 * station.point
-                last_take_over = take_over.date_created
-        result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point
+                if last_take_over is not None:
+                    result[take_over.teamId] += (take_over.date_created - last_take_over).seconds / 60 * station.point
+                    last_take_over = take_over.date_created
+                else:
+                    last_take_over = take_over.date_created
+        if last_take_over is not None:
+            result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point
     return result
 
+
+def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
+    if not game_request.args.__contains__("session-id") or \
+            db.session.query(GameSession).filter_by(id=game_request.args["session-id"]).first() is None:
+        return None, None
+
+    if not game_request.args.__contains__("station-id") or \
+            db.session.query(Stations).filter_by(id=game_request.args["station-id"],
+                                                 session=game_request.args["session-id"]).first() is None:
+        return None, None
+
+    game_session = db.session.query(GameSession).filter_by(id=game_request.args["session-id"]).first()
+    game_id = multi_games_running(game_session.games)
+    return game_id, game_session
 

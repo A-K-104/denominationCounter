@@ -2,3 +2,4 @@
 /gameData.db
 /gameDatasq.db
 /logs/
+**/__pycache__/
