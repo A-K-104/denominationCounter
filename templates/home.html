@@ -41,14 +41,15 @@
         <h3 class="title"> game session name table</h3>
         <table class="statusTable">
             <tr>
+                <th>id</th>
                 <th>game session name</th>
                 <th>enter</th>
                 <th>edit</th>
-                <th>enable</th>
                 <th>delete</th>
             </tr>
             {%for game in gamesSessions%}
             <tr>
+                <td>{{game.id}}</td>
                 <td>
                     <p>
                         {{game.name}}</p>
@@ -60,11 +61,6 @@
                 <td>
                     <form action="/home" method="post">
                         <button name="manageGame" value="{{game.id}}">manage session</button>
-                    </form>
-                </td>
-                <td>
-                    <form action="/home" method="post">
-                        <button name="disableEnableGame" value="{{game.id}}">{{game.active}}</button>
                     </form>
                 </td>
                 <td>
