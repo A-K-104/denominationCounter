@@ -19,11 +19,11 @@
 .team button {
     border: none;
     font-weight: bold;
-    font-size: 25px;
+    font-size: 40px;
     border-radius: 50%;
     text-shadow: 0 0 6px white, 0 0 10px white;
-    height: 200px;
-    width: 200px;
+    height: 300px;
+    width: 300px;
     text-transform: capitalize;
 }
 
