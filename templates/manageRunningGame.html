@@ -46,7 +46,7 @@
                 if (response.status === 200) {
                     response.json().then(data => {
                         for (let header in data){
-                            document.getElementById(header).innerText = data[header]
+                            document.getElementById(header).innerText = data[header].toFixed(2)
                         }
                     });
 
