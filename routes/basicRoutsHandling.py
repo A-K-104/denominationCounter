@@ -228,7 +228,7 @@ def running_game_manage():
     if request.method == "POST":
         running_game.date_ended = datetime.utcnow()
         running_game.active = False
-    return render_template("manageRunningGame.html")
+    return render_template("manageRunningGame.html", teams=game_session.teams)
 
 
 @basic_routs_handling.route('/run-game/stop', methods=['GET', 'POST'])

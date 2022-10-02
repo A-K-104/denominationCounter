@@ -3,6 +3,7 @@
 <head>
     <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
     <link rel="stylesheet" type="text/css" href="/static/styles/login.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/tables.css">
     <title class="title">Manage live game</title>
 </head>
 {% extends 'navigationBar.html'%}
@@ -13,8 +14,28 @@
 <h2 class="title">Game home page</h2>
 
 <button onclick="redirectPage('run-game')">stop game</button>
- <div id="liveGame"></div>
 
+<div class="section">
+    <div class="container">
+        <table class="statusTable">
+            <tr>
+                <th>team name</th>
+                <th>team score</th>
+            </tr>
+            {%for team in teams%}
+            <tr>
+                <td>
+                    <p style="color:{{team.color}};">
+                        {{team.name}}</p>
+                </td>
+                <td>
+                    <p id="{{team.id}}">0</p>
+                </td>
+            </tr>
+            {%endfor%}
+        </table>
+    </div>
+</div>
 </body>
 <script>
 
@@ -22,11 +43,11 @@
         fetch('/run-game/get-score'+ window.location.search)
             .then((response) => {
                 console.log(response)
-                const scoreDiv = document.querySelector("#liveGame");
                 if (response.status === 200) {
                     response.json().then(data => {
-                        console.log(data);
-                        scoreDiv.innerHTML = JSON.stringify(data);
+                        for (let header in data){
+                            document.getElementById(header).innerText = data[header]
+                        }
                     });
 
                 }
