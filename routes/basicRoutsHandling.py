@@ -325,7 +325,9 @@ def calc_game(game_session: GameSession, game: Games) -> None or dict:
     if game_ended is None:
         game_ended = datetime.utcnow()
 
+    sub_result: dict = {}
     for station in game_session.stations:
+
         sub_result = station_calc(game_session.teams, station,
                                   game.stationsTakeOvers, game_ended)
         for team in game_session.teams:
