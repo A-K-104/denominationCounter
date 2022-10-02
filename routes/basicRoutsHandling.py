@@ -347,17 +347,19 @@ def station_calc(teams: list, station: Stations, take_overs: list,
                  game_ended: datetime) -> None or dict:
     result: dict = {}
     last_take_over: datetime or None = None
+    pre_team: int or None = None
     for team in teams:
         result[team.id] = 0
     take_overs = get_list_of_take_overs_per_station(station, take_overs)
     if len(take_overs) > 0:
         for take_over in take_overs:
             if result.__contains__(take_over.teamId):
-                if last_take_over is not None:
-                    result[take_over.teamId] += (take_over.date_created - last_take_over).seconds / 60 * station.point
+                if last_take_over is not None and pre_team is not None:
+                    result[pre_team] += (take_over.date_created - last_take_over).seconds / 60 * station.point
                     last_take_over = take_over.date_created
                 else:
                     last_take_over = take_over.date_created
+            pre_team = take_over.teamId
         if last_take_over is not None:
             result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point
     return result
