@@ -163,9 +163,8 @@ def live_game():
 @basic_routs_handling.route('/live-station', methods=['GET'])
 def live_station():
     game_id, game_session = get_game_id_from_re(request)
-    station: Stations = db.session.query(Stations).filter_by(id=request.args.get("station-id")).first()
+    station: Stations = db.session.query(Stations).filter_by(id=request.args["session-id"]).first()
     connected = True
-
     if not (station.connected and (datetime.utcnow() - station.last_ping).seconds / 60 < 2)\
             or request.args.__contains__("alerted"):
         station.connected = True
@@ -180,7 +179,7 @@ def live_station():
 
     return render_template("live_station.html", teams=list(game_session.teams),
                            sessionId=request.args['session-id'],
-                           stationId=request.args['station-id'],
+                           stationName=station.name,
                            teamInControl=team_in_con, connected=connected)
 
 
