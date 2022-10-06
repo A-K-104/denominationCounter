@@ -12,7 +12,7 @@ class Games(db.Model):
     active = db.Column(db.Boolean(), default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_ended = db.Column(db.DateTime, nullable=True)
-
+    game_score = db.Column(db.JSON, default={}, nullable=False)
     session = db.Column(db.Integer, db.ForeignKey(GameSession.id))
 
     stationsTakeOvers = db.relationship("StationsTakeOvers", backref="Games", lazy=True)

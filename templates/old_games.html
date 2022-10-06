@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--<link rel= "stylesheet" type= "text/css" href= "/static/styles/styles.css">-->
+
+<html lang="en-US">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
+    <link rel="stylesheet" type="text/css" href="/static/styles/tables.css">
+    <title class="title">live game</title>
+</head>
+{% extends 'navigationBar.html'%}
+
+{% block content %}
+
+<body>
+<div class="section">
+    <div class="container">
+        <h3 class="title">Old games {{sessionId}}</h3>
+        <div>
+            <table class="statusTable">
+                <tr>
+                    <th>team names</th>
+                    <th>team scores</th>
+                    <th>recalculate</th>
+                </tr>
+                {%for game in gamesScore%}
+                <tr>
+                    <td>
+                        {%for team in game%}
+                        <p style="color:{{game.get(team).get("color")}};">{{team}}</p>
+                        {%endfor%}
+                    </td>
+                    <td>
+                        {%for team in game%}
+                        <p style="color:{{game.get(team).get("color")}};">{{game.get(team).get("score")}}</p>
+                        {%endfor%}
+                    </td>
+                    <td>
+                        <p>
+                            <button onclick="redirectPage('/live-station')" disabled>
+                                recalculate score
+                            </button>
+                    </td>
+                </tr>
+                {%endfor%}
+            </table>
+        </div>
+    </div>
+</div>
+{{message}}
+</body>
+<script>
+    function redirectPage(path) {
+        location.assign(path)
+    }
+</script>
+{% endblock %}
+
+
+</html>

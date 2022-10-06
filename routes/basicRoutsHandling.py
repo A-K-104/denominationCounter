@@ -114,11 +114,17 @@ def old_games():
     if not request.args.__contains__('id') or \
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
         return redirect("/")
-    game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
+    game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
     # todo: calc game show all games score
-
-    return str(calc_game(game_session, game_session.games[-1]))
-    return render_template("games.html", games=list(game_session.games))
+    games_score: list = []
+    game: Games
+    for game in game_session.games:
+        if game.game_score == {}:
+            game.game_score = calc_game(game_session, game)
+        if not game.active:
+            games_score.append(game.game_score)
+    return render_template("old_games.html", gamesScore=convert_team_id_to_team_name_dict(games_score, game_session.teams),
+                           sessionId=game_session.id)
 
 
 @basic_routs_handling.route('/stations', methods=['GET', 'POST'])
@@ -179,7 +185,7 @@ def live_station():
 
     return render_template("live_station.html", teams=list(game_session.teams),
                            sessionId=request.args['session-id'],
-                           stationName=station.name,
+                           stationName=station.name, stationId=station.id,
                            teamInControl=team_in_con, connected=connected)
 
 
@@ -225,8 +231,7 @@ def running_game_manage():
     if running_game is None:
         return "error multiply games are running or none"
     if request.method == "POST":
-        running_game.date_ended = datetime.utcnow()
-        running_game.active = False
+        stop_running_game(running_game, game_session)
     return render_template("manageRunningGame.html", teams=game_session.teams)
 
 
@@ -236,12 +241,10 @@ def running_game_stop():
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
         return redirect("/")
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
-    running_game = multi_games_running(game_session.games)
+    running_game: Games = multi_games_running(game_session.games)
     if running_game is None:
         return "error multiply games are running or none"
-    running_game.date_ended = datetime.utcnow()
-    running_game.active = False
-    db.session.commit()
+    stop_running_game(running_game, game_session)
     return redirect(f"/games-menu?id={game_session.id}")
 
 
@@ -324,7 +327,6 @@ def calc_game(game_session: GameSession, game: Games) -> None or dict:
     if game_ended is None:
         game_ended = datetime.utcnow()
 
-    sub_result: dict = {}
     for station in game_session.stations:
 
         sub_result = station_calc(game_session.teams, station,
@@ -378,3 +380,22 @@ def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
     game_id = multi_games_running(game_session.games)
     return game_id, game_session
 
+
+def stop_running_game(running_game: Games, game_session: GameSession) -> None:
+    running_game.date_ended = datetime.utcnow()
+    running_game.game_score = calc_game(game_session, running_game)
+    running_game.active = False
+    db.session.commit()
+
+
+def convert_team_id_to_team_name_dict(games_score: list, teams: list) -> list:
+    new_result: list = []
+    for game_score in games_score:
+        new_dict: dict = {}
+        for score in game_score:
+            for team in teams:
+                if str(team.id) == score:
+                    new_dict[team.name] = {"score": game_score[score],
+                                           "color": team.color}
+        new_result.append(new_dict)
+    return new_result
