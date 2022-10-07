@@ -6,7 +6,7 @@
 </head>
 {% block content %}
 
-<body style="background: {{teamInControl.color}}">
+<body id="body" style="background: {{teamInControl.color}}">
 <div class="container">
     <h1 class="header">Live station {{stationName}}</h1>
     <table id="ta">
@@ -73,14 +73,18 @@
                                     element.classList.remove('button-on');
 
                                     let newSelected = document.getElementById(data["teamId"])
-                                    newSelected.classList.add('button-on');
-                                    newSelected.classList.remove('button-off');
+                                    if (newSelected != null) {
+                                        newSelected.classList.add('button-on');
+                                        newSelected.classList.remove('button-off');
+                                    }
                                 }
                             })
                         } else {
                             let newSelected = document.getElementById(data["teamId"])
-                            newSelected.classList.add('button-on');
-                            newSelected.classList.remove('button-off');
+                            if (newSelected != null) {
+                                newSelected.classList.add('button-on');
+                                newSelected.classList.remove('button-off');
+                            }
                         }
                     }
                 });
