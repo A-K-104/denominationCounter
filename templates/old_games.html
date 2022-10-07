@@ -25,18 +25,18 @@
                 {%for game in gamesScore%}
                 <tr>
                     <td>
-                        {%for team in game%}
-                        <p style="color:{{game.get(team).get("color")}};">{{team}}</p>
+                        {%for team in game.get("score")%}
+                        <p style="color:{{game.get("score").get(team).get("color")}};">{{team}}</p>
                         {%endfor%}
                     </td>
                     <td>
-                        {%for team in game%}
-                        <p style="color:{{game.get(team).get("color")}};">{{game.get(team).get("score")}}</p>
+                        {%for team in game.get("score")%}
+                        <p style="color:{{game.get("score").get(team).get("color")}};">{{game.get("score").get(team).get("score")}}</p>
                         {%endfor%}
                     </td>
                     <td>
                         <p>
-                            <button onclick="redirectPage('/live-station')" disabled>
+                            <button onclick="redirectPage('/old-games/re-calc?id={{sessionId}}&game-id={{game.get("id")}}')">
                                 recalculate score
                             </button>
                     </td>

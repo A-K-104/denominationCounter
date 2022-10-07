@@ -123,8 +123,22 @@ def old_games():
             game.game_score = calc_game(game_session, game)
         if not game.active:
             games_score.append(game.game_score)
-    return render_template("old_games.html", gamesScore=convert_team_id_to_team_name_dict(games_score, game_session.teams),
+    return render_template("old_games.html", gamesScore=games_score,
                            sessionId=game_session.id)
+
+
+@basic_routs_handling.route('/old-games/re-calc', methods=['GET', 'POST'])
+def re_calc_game():
+    if not request.args.__contains__('game-id') or not request.args.__contains__('id'):
+        return redirect("/")
+    game: Games = db.session.query(Games).filter_by(id=request.args["game-id"]).first()
+    game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
+    if game is None or game_session is None:
+        return redirect("/")
+    game.game_score = {"score": convert_team_id_to_team_name_dict(calc_game(game_session, game), game_session.teams),
+                       "id": game.id}
+    db.session.commit()
+    return redirect(f"/old-games?id={game_session.id}")
 
 
 @basic_routs_handling.route('/stations', methods=['GET', 'POST'])
@@ -143,15 +157,43 @@ def stations():
                 db.session.commit()
             else:
                 message = "name already exist"
-        elif request.form.__contains__('removeStationId'):
-            station = Stations.query.get(request.form['removeStationId'])
-            if station is not None:
-                db.session.delete(station)
-                db.session.commit()
         else:
             message = "failed to get par"
     session_station = db.session.query(Stations).filter_by(session=request.args.get("id")).all()
     return render_template("stations.html", stations=list(session_station), message=message, id=request.args.get("id"))
+
+
+@basic_routs_handling.route('/stations/remove', methods=['POST', 'GET'])
+def remove_station():
+    if not request.args.__contains__('id') or \
+            db.session.query(GameSession).filter_by(id=request.args["id"]).first() is None:
+        return redirect("/")
+
+    if request.args.__contains__('removeStationId'):
+        station = Stations.query.get(request.args['removeStationId'])
+        if station is not None:
+            db.session.delete(station)
+            db.session.commit()
+
+    return redirect(f"/stations?id={request.args['id']}")
+
+
+@basic_routs_handling.route('/stations/edit', methods=['POST'])
+def edit_station():
+    if not request.args.__contains__('id') or \
+            not request.args.__contains__('stationId') or \
+            not request.form.__contains__('stations_point'):
+        return redirect("/stations")
+
+    game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
+    station: Stations = db.session.query(Stations).filter_by(id=request.args.get("stationId")).first()
+
+    if game_session is None or station is None:
+        return redirect("/stations")
+    station.point = request.form['stations_point']
+    db.session.commit()
+
+    return redirect(f"/stations?id={request.args['id']}")
 
 
 @basic_routs_handling.route('/live-game', methods=['GET', 'POST'])
@@ -170,8 +212,10 @@ def live_game():
 def live_station():
     game_id, game_session = get_game_id_from_re(request)
     station: Stations = db.session.query(Stations).filter_by(id=request.args["station-id"]).first()
+    if station is None or game_session is None:
+        return redirect("/")
     connected = True
-    if not (station.connected and (datetime.utcnow() - station.last_ping).seconds / 60 < 2)\
+    if not (station.connected and (datetime.utcnow() - station.last_ping).seconds / 60 < 2) \
             or request.args.__contains__("alerted"):
         station.connected = True
         station.last_ping = datetime.utcnow()
@@ -191,7 +235,6 @@ def live_station():
 
 @basic_routs_handling.route('/live-station/takeover', methods=['GET'])
 def live_station1():
-
     game_id, game_session = get_game_id_from_re(request)
 
     if game_id is not None:
@@ -273,7 +316,8 @@ def game_is_alive() -> (str, int):
         return "false", 400
 
     game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args["session-id"]).first()
-    station: Stations = db.session.query(Stations).filter_by(id=request.args["station-id"], session=request.args["session-id"]).first()
+    station: Stations = db.session.query(Stations).filter_by(id=request.args["station-id"],
+                                                             session=request.args["session-id"]).first()
 
     if station is None or game_session is None:
         return "false", 400
@@ -383,19 +427,18 @@ def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
 
 def stop_running_game(running_game: Games, game_session: GameSession) -> None:
     running_game.date_ended = datetime.utcnow()
-    running_game.game_score = calc_game(game_session, running_game)
+    running_game.game_score = {
+        "score": convert_team_id_to_team_name_dict(calc_game(game_session, running_game), game_session.teams),
+        "id": running_game.id}
     running_game.active = False
     db.session.commit()
 
 
-def convert_team_id_to_team_name_dict(games_score: list, teams: list) -> list:
-    new_result: list = []
-    for game_score in games_score:
-        new_dict: dict = {}
-        for score in game_score:
-            for team in teams:
-                if str(team.id) == score:
-                    new_dict[team.name] = {"score": game_score[score],
-                                           "color": team.color}
-        new_result.append(new_dict)
-    return new_result
+def convert_team_id_to_team_name_dict(game_score: dict, teams: list) -> dict:
+    new_dict: dict = {}
+    for score in game_score:
+        for team in teams:
+            if team.id == score:
+                new_dict[team.name] = {"score": game_score[score],
+                                       "color": team.color}
+    return new_dict

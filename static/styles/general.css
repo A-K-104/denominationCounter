@@ -1,6 +1,6 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
-        background: #E1E2E1;
+    background: #E1E2E1;
 }
 
 button {
@@ -21,4 +21,11 @@ button {
 button:hover {
     background: #62727b;
     color: #ffffff;
+}
+
+input.editInput {
+    background-color: rgba(0, 0, 0, 0);
+    text-align: center;
+    border-width: 0 !important;
+    -moz-appearance:textfield !important;
 }
