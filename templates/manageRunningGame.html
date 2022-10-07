@@ -52,13 +52,13 @@
                         {{station.name}}</p>
                 </td>
                 <td>
-                    <p id="teamControlStation{{station.id}}">N/A</p>
+                    <p id="teamControlStation{{station.id}}"></p>
                 </td>
                 <td>
-                    <p id="pingStation{{station.id}}">{{station.last_ping}}</p>
+                    <p id="pingStation{{station.id}}"></p>
                 </td>
-                <td id="connectedStationTd{{station.id}}" style="background: #FF0000">
-                    <p id="connectedStation{{station.id}}">disconnected</p>
+                <td id="connectedStationTd{{station.id}}">
+                    <p id="connectedStation{{station.id}}"></p>
                 </td>
             </tr>
             {%endfor%}
@@ -92,7 +92,8 @@
                             let connected = data["stationScore"][header]["connected"];
                             let connectedInput = document.getElementById("connectedStation" + header);
                             let connectedTd = document.getElementById("connectedStationTd" + header);
-                            if (connected != null || !connected){
+                            debugger;
+                            if (connected){
                                  connectedTd.style.backgroundColor = "#00FF00";
                                  connectedInput.innerText = "connected"
                             }

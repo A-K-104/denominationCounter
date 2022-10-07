@@ -376,7 +376,11 @@ def calc_game(game_session: GameSession, game: Games, for_running_game=False) ->
     game_ended = game.date_ended
     if game_ended is None:
         game_ended = datetime.utcnow()
-
+    if for_running_game:
+        for station in game_session.stations:
+            last_team_dict[station.id] = {"name": station.name, "team": "N/A", "color": "#000000",
+                                          "teamName": "N/A", "connected": station.connected,
+                                          "lastPing": station.last_ping}
     for station in game_session.stations:
 
         sub_result, last_team = station_calc(game_session.teams, station,
@@ -463,7 +467,7 @@ def convert_team_id_to_team_name_dict(game_score: dict, teams: list) -> dict:
 def calc_station_status(game_session: GameSession):
     game_stations: list = game_session.stations
     for station in game_stations:
-        if station.connected and (datetime.utcnow() - station.last_ping).seconds / 60 > 2:
+        if (datetime.utcnow() - station.last_ping).seconds / 60 > 2:
             station.connected = False
         else:
             station.connected = True
