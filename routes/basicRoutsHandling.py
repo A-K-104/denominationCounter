@@ -202,7 +202,6 @@ def edit_station():
 
 @basic_routs_handling.route('/live-game', methods=['GET', 'POST'])
 def live_game():
-    #   todo: added error message
     message = ""
     if not request.args.__contains__("session-id") or \
             db.session.query(GameSession).filter_by(id=request.args["session-id"]).first() is None:
@@ -278,7 +277,8 @@ def running_game_manage():
         return "error multiply games are running or none"
     if request.method == "POST":
         stop_running_game(running_game, game_session)
-    return render_template("manageRunningGame.html", teams=game_session.teams, id=request.args.get("id"))
+    return render_template("manageRunningGame.html", teams=game_session.teams, id=request.args.get("id"),
+                           stations=game_session.stations)
 
 
 @basic_routs_handling.route('/run-game/stop', methods=['GET', 'POST'])
@@ -301,7 +301,9 @@ def running_game_get_live():
         return {"status": 400, "error": "faild to find session"}, 400
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
 
-    return calc_game(game_session, game_session.games[-1])[0]
+    calc_station_status(game_session)
+    game_score, station_score = calc_game(game_session, game_session.games[-1])
+    return {"gameScore": game_score, "stationScore": station_score}
 
 
 @basic_routs_handling.route('/enter-to-session', methods=['GET', 'POST'])
@@ -382,7 +384,7 @@ def calc_game(game_session: GameSession, game: Games) -> (None, None) or (dict, 
         team: Teams = db.session.query(Teams).filter_by(id=last_team).first()
         if team is not None:
             last_team_dict[station.id] = {"name": station.name, "team": last_team, "color": team.color,
-                                          "teamName": team.name}
+                                          "teamName": team.name, "connected": station.connected, "lastPing": station.last_ping}
         for team in game_session.teams:
             result[team.id] += sub_result[team.id]
     return result, last_team_dict
@@ -452,3 +454,12 @@ def convert_team_id_to_team_name_dict(game_score: dict, teams: list) -> dict:
                 new_dict[team.name] = {"score": round(game_score[score], 2),
                                        "color": team.color}
     return new_dict
+
+
+def calc_station_status(game_session: GameSession):
+    game_stations: list = game_session.stations
+    for station in game_stations:
+        if station.connected and (datetime.utcnow() - station.last_ping).seconds / 60 > 2:
+            station.connected = False
+    db.session.commit()
+

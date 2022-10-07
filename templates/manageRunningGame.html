@@ -29,7 +29,36 @@
                         {{team.name}}</p>
                 </td>
                 <td>
-                    <p id="{{team.id}}">0</p>
+                    <p id="team{{team.id}}">0</p>
+                </td>
+            </tr>
+            {%endfor%}
+        </table>
+    </div>
+</div>
+<div class="section">
+    <div class="container">
+        <table class="statusTable">
+            <tr>
+                <th>station name</th>
+                <th>team in control</th>
+                <th>last station ping</th>
+                <th>station alive</th>
+            </tr>
+            {%for station in stations %}
+            <tr>
+                <td>
+                    <p>
+                        {{station.name}}</p>
+                </td>
+                <td>
+                    <p id="teamControlStation{{station.id}}">N/A</p>
+                </td>
+                <td>
+                    <p id="pingStation{{station.id}}">{{station.last_ping}}</p>
+                </td>
+                <td id="connectedStationTd{{station.id}}">
+                    <p id="connectedStation{{station.id}}">{{station.connected}}</p>
                 </td>
             </tr>
             {%endfor%}
@@ -43,17 +72,34 @@
 
     function redirectPageWithConfPop(path) {
         if (confirm('Are you sure that you want to stop the current game?')) {
-            location.assign(path + window.location.search)
+            location.assign(path + window.location.search);
         }
     }
     function getGameScore() {
         fetch('/run-game/get-score' + window.location.search)
             .then((response) => {
-                console.log(response)
                 if (response.status === 200) {
                     response.json().then(data => {
-                        for (let header in data) {
-                            document.getElementById(header).innerText = data[header].toFixed(2)
+                        for (let header in data["gameScore"]) {
+                            document.getElementById("team" + header).innerText = data["gameScore"][header].toFixed(2);
+                        }
+                        for (let header in data["stationScore"]) {
+                            let teamInControlInput = document.getElementById("teamControlStation" + header);
+                            teamInControlInput.innerText = data["stationScore"][header]["teamName"];
+                            teamInControlInput.style.color = data["stationScore"][header]["color"];
+                            let myDate = new Date(data["stationScore"][header]["lastPing"]);
+                            document.getElementById("pingStation" + header).innerText = myDate.toLocaleString();
+                            let connected = data["stationScore"][header]["connected"];
+                            let connectedInput = document.getElementById("connectedStation" + header);
+                            let connectedTd = document.getElementById("connectedStationTd" + header);
+                            if (!connected){
+                                 connectedTd.style.background = "#FF0000";
+                                 connectedInput.innerText = "connected"
+                            }
+                            else {
+                                connectedTd.style.background = "#00FF00";
+                                connectedInput.innerText = "disconnected"
+                            }
                         }
                     });
 
