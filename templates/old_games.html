@@ -12,12 +12,13 @@
 <body>
 <div class="section">
     <div class="container">
-        <h3 class="title">Old games {{sessionId}}</h3>
+        <h3 class="title">Old games in session: {{sessionId}}</h3>
         <div>
             <table class="statusTable">
                 <tr>
                     <th>team names</th>
                     <th>team scores</th>
+                    <th>station hold</th>
                     <th>recalculate</th>
                 </tr>
                 {%for game in gamesScore%}
@@ -33,7 +34,13 @@
                         {%endfor%}
                     </td>
                     <td>
-                        <p>
+                        {%for station in game.get("lastTeams")%}
+                        <p style="color:{{game.get("lastTeams").get(station).get("color")}};">
+                        {{game.get("lastTeams").get(station).get("name")}}: {{game.get("lastTeams").get(station).get("teamName")}}</p>
+
+                        {%endfor%}
+                    </td>
+                    <td>
                             <button onclick="redirectPage('/old-games/re-calc?id={{sessionId}}&game-id={{game.get("id")}}')">
                                 recalculate score
                             </button>

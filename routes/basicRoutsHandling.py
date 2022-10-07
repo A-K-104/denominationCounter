@@ -111,17 +111,18 @@ def log_to_game():
 
 @basic_routs_handling.route('/old-games', methods=['GET', 'POST'])
 def old_games():
-    if not request.args.__contains__('id') or \
-            db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
+    if not request.args.__contains__('id'):
         return redirect("/")
     game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
+
     if game_session is None:
         return redirect("/")
+
     games_score: list = []
     game: Games
     for game in game_session.games:
         if game.game_score == {}:
-            game.game_score = calc_game(game_session, game)
+            return redirect(f"re_calc_game?game-id={game.id}&id={game_session.id}")
         if not game.active:
             games_score.append(game.game_score)
     return render_template("old_games.html", gamesScore=games_score,
@@ -136,8 +137,9 @@ def re_calc_game():
     game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
     if game is None or game_session is None:
         return redirect("/")
-    game.game_score = {"score": convert_team_id_to_team_name_dict(calc_game(game_session, game), game_session.teams),
-                       "id": game.id}
+    game_res, last_teams = calc_game(game_session, game)
+    game_res = convert_team_id_to_team_name_dict(game_res, game_session.teams)
+    game.game_score = {"score": game_res, "lastTeams": last_teams, "id": game.id}
 
     db.session.commit()
     return redirect(f"/old-games?id={game_session.id}")
@@ -299,7 +301,7 @@ def running_game_get_live():
         return {"status": 400, "error": "faild to find session"}, 400
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
 
-    return calc_game(game_session, game_session.games[-1])
+    return calc_game(game_session, game_session.games[-1])[0]
 
 
 @basic_routs_handling.route('/enter-to-session', methods=['GET', 'POST'])
@@ -361,10 +363,11 @@ def team_in_control(game: Games, station_id: int):
     return -1
 
 
-def calc_game(game_session: GameSession, game: Games) -> None or dict:
+def calc_game(game_session: GameSession, game: Games) -> (None, None) or (dict, dict):
     if not game_session.games.__contains__(game):
-        return None
+        return None, None
     result: dict = {}
+    last_team_dict: dict = {}
     for team in game_session.teams:
         result[team.id] = 0
 
@@ -374,11 +377,15 @@ def calc_game(game_session: GameSession, game: Games) -> None or dict:
 
     for station in game_session.stations:
 
-        sub_result = station_calc(game_session.teams, station,
-                                  game.stationsTakeOvers, game_ended)
+        sub_result, last_team = station_calc(game_session.teams, station,
+                                             game.stationsTakeOvers, game_ended)
+        team: Teams = db.session.query(Teams).filter_by(id=last_team).first()
+        if team is not None:
+            last_team_dict[station.id] = {"name": station.name, "team": last_team, "color": team.color,
+                                          "teamName": team.name}
         for team in game_session.teams:
             result[team.id] += sub_result[team.id]
-    return result
+    return result, last_team_dict
 
 
 def get_list_of_take_overs_per_station(station: Stations, take_overs: list) -> list:
@@ -390,7 +397,7 @@ def get_list_of_take_overs_per_station(station: Stations, take_overs: list) -> l
 
 
 def station_calc(teams: list, station: Stations, take_overs: list,
-                 game_ended: datetime) -> None or dict:
+                 game_ended: datetime) -> (None, None) or (dict, int):
     result: dict = {}
     last_take_over: datetime or None = None
     pre_team: int or None = None
@@ -408,7 +415,7 @@ def station_calc(teams: list, station: Stations, take_overs: list,
             pre_team = take_over.teamId
         if last_take_over is not None:
             result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point
-    return result
+    return result, pre_team
 
 
 def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
@@ -428,9 +435,11 @@ def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
 
 def stop_running_game(running_game: Games, game_session: GameSession) -> None:
     running_game.date_ended = datetime.utcnow()
-    running_game.game_score = {
-        "score": convert_team_id_to_team_name_dict(calc_game(game_session, running_game), game_session.teams),
-        "id": running_game.id}
+    game_res, last_teams = calc_game(game_session, running_game)
+    game_res = convert_team_id_to_team_name_dict(game_res, game_session.teams)
+
+    running_game.game_score = {"score": game_res, "lastTeams": last_teams, "id": running_game.id}
+
     running_game.active = False
     db.session.commit()
 
