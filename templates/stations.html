@@ -3,7 +3,6 @@
 <head>
     <link rel="stylesheet" type="text/css" href="/static/styles/general.css">
     <link rel="stylesheet" type="text/css" href="/static/styles/tables.css">
-    <link rel="stylesheet" type="text/css" href="/static/styles/styles.css">
     <title class="title">Manage station</title>
 </head>
 {% extends 'navigationBar.html'%}
@@ -50,10 +49,11 @@
                         {{station.name}}</p>
                 </td>
                 <form action="/stations/edit?id={{id}}&stationId={{station.id}}" method="post">
-                    <td>
+                    <td style="width: 15%">
 
                         <input name="stations_point" type="number" step="0.1" id="" class="editInput"
                                value="{{station.point}}" readonly
+                               STYLE="width: 100%;"
                                ondblclick='this.readOnly=false' required>
                     </td>
                     <td>

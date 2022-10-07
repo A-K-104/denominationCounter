@@ -23,9 +23,14 @@ button:hover {
     color: #ffffff;
 }
 
+
 input.editInput {
     background-color: rgba(0, 0, 0, 0);
     text-align: center;
+    border-width: 0 !important;
+    -moz-appearance:textfield !important;
+}
+input.editInput:focus  {
     border-width: 0 !important;
     -moz-appearance:textfield !important;
 }

@@ -12,56 +12,25 @@
 <body>
 
 <div class="section">
-    <form class="section" action="/enter-to-session" method="post">
-        <div class="container">
-            <h3 class="title"> enter into game session</h3>
-            <div class="login-field">
-                <label class="field-label"><b>game session id</b></label>
-                <input name="gameSessionId" type="number" autocomplete="off" required>
-            </div>
-            <button>enter</button>
-        </div>
-    </form>
-</div>
-<div class="section">
-    <form class="section" action="/home" method="post">
-        <div class="container">
-            <h3 class="title"> Create game session</h3>
-            <div class="login-field">
-                <label class="field-label"><b>game session name</b></label>
-                <input name="gameSessionName" type="text" value="{{gameSessionName.name}}" autocomplete="off" required>
-            </div>
-            <button name="{{method}}" value="{{gameSessionName.id}}">enter</button>
-        </div>
-    </form>
-</div>
-
-<div class="section">
     <div class="container">
-        <h3 class="title"> game session name table</h3>
+        <h3 class="title">Game Sessions</h3>
         <table class="statusTable">
             <tr>
-                <th>id</th>
                 <th>game session name</th>
                 <th>enter</th>
-                <th>edit</th>
+                <th>manage session</th>
                 <th>delete</th>
             </tr>
             {%for game in gamesSessions%}
             <tr>
-                <td>{{game.id}}</td>
                 <td>
-                    <p>
-                        {{game.name}}</p>
+                    <p>{{game.name}}</p>
                 </td>
                 <td>
-                    <button onclick="redirectPage('{{game.id}}')">enter session</button>
-
+                        <button onclick="redirectPage('/live-game?session-id={{game.id}}')">enter game</button>
                 </td>
                 <td>
-                    <form action="/home" method="post">
-                        <button name="manageGame" value="{{game.id}}">manage session</button>
-                    </form>
+                        <button onclick="redirectPage('/games-menu?id={{game.id}}')">manage session</button>
                 </td>
                 <td>
                     <form action="/home" method="post">
@@ -74,11 +43,23 @@
         </table>
     </div>
 </div>
-{{message}}
+
+<div class="section">
+    <form class="section" action="/home" method="post">
+        <div class="container">
+            <h3 class="title"> Create game session</h3>
+            <div class="login-field">
+                <label class="field-label"><b>game session name</b></label>
+                <input name="gameSessionName" type="text" value="{{gameSessionName.name}}" autocomplete="off" required>
+            </div>
+            <button name="{{method}}" value="{{gameSessionName.id}}">create</button>
+        </div>
+    </form>
+</div>
 </body>
 <script>
-    function redirectPage(gameId) {
-        location.replace("/games-menu?id=" + gameId)
+    function redirectPage(path) {
+        location.assign(path)
     }
 </script>
 {% endblock %}
