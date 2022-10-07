@@ -92,7 +92,7 @@
                             let connected = data["stationScore"][header]["connected"];
                             let connectedInput = document.getElementById("connectedStation" + header);
                             let connectedTd = document.getElementById("connectedStationTd" + header);
-                            if (!connected){
+                            if (connected != null || !connected){
                                  connectedTd.style.background = "#FF0000";
                                  connectedInput.innerText = "connected"
                             }
