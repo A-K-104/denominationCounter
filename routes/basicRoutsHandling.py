@@ -121,9 +121,9 @@ def old_games():
     games_score: list = []
     game: Games
     for game in game_session.games:
-        if game.game_score == {}:
-            return redirect(f"re_calc_game?game-id={game.id}&id={game_session.id}")
         if not game.active:
+            if game.game_score == {}:
+                return redirect(f"/old-games/re-calc?game-id={game.id}&id={game_session.id}")
             games_score.append(game.game_score)
     return render_template("old_games.html", gamesScore=games_score,
                            sessionId=game_session.id, id=request.args.get("id"))
