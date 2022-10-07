@@ -72,7 +72,7 @@
 
     function redirectPageWithConfPop(path) {
         if (confirm('Are you sure that you want to stop the current game?')) {
-            location.assign(path + window.location.search);
+            location.assign(path + "/stop" + window.location.search)
         }
     }
     function getGameScore() {
@@ -94,11 +94,11 @@
                             let connectedTd = document.getElementById("connectedStationTd" + header);
                             debugger;
                             if (connected != null || !connected){
-                                 connectedTd.style.background = "#FF0000";
+                                 connectedTd.style.backgroundColor = "#FF0000";
                                  connectedInput.innerText = "connected"
                             }
                             else {
-                                connectedTd.style.background = "#00FF00";
+                                connectedTd.style.backgroundColor = "#00FF00";
                                 connectedInput.innerText = "disconnected"
                             }
                         }
