@@ -115,7 +115,8 @@ def old_games():
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
         return redirect("/")
     game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
-    # todo: calc game show all games score
+    if game_session is None:
+        return redirect("/")
     games_score: list = []
     game: Games
     for game in game_session.games:
@@ -124,7 +125,7 @@ def old_games():
         if not game.active:
             games_score.append(game.game_score)
     return render_template("old_games.html", gamesScore=games_score,
-                           sessionId=game_session.id)
+                           sessionId=game_session.id, id=request.args.get("id"))
 
 
 @basic_routs_handling.route('/old-games/re-calc', methods=['GET', 'POST'])
@@ -137,6 +138,7 @@ def re_calc_game():
         return redirect("/")
     game.game_score = {"score": convert_team_id_to_team_name_dict(calc_game(game_session, game), game_session.teams),
                        "id": game.id}
+
     db.session.commit()
     return redirect(f"/old-games?id={game_session.id}")
 
@@ -257,8 +259,7 @@ def new_game():
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
     for game in game_session.games:
         if game.active:
-            game.date_ended = datetime.utcnow()
-            game.active = False
+            stop_running_game(game, game_session)
     game_session.games.append(Games(active=True))
     db.session.commit()
     return redirect(f"/run-game?id={game_session.id}")
@@ -275,7 +276,7 @@ def running_game_manage():
         return "error multiply games are running or none"
     if request.method == "POST":
         stop_running_game(running_game, game_session)
-    return render_template("manageRunningGame.html", teams=game_session.teams)
+    return render_template("manageRunningGame.html", teams=game_session.teams, id=request.args.get("id"))
 
 
 @basic_routs_handling.route('/run-game/stop', methods=['GET', 'POST'])
