@@ -8,12 +8,20 @@
         <a href="/stations?id={{id}}" class="nav-link">stations</a>
         <a href="/teams?id={{id}}" class="nav-link">teams</a>
         <a href="/old-games?id={{id}}" class="nav-link">old-games</a>
-        <a href="/new-game?id={{id}}" class="nav-link">new-games</a>
+        <a href="/new-game?id={{id}}" class="nav-link confirmation">new-games</a>
         <a href="/run-game?id={{id}}" class="nav-link">running-game</a>
 
     </div>
 </div>
-
+<script type="text/javascript">
+    let elems = document.getElementsByClassName('confirmation');
+    let confirmIt = function (e) {
+        if (!confirm('Are you sure that you want to create new game?')) e.preventDefault();
+    };
+    for (let i = 0, l = elems.length; i < l; i++) {
+        elems[i].addEventListener('click', confirmIt, false);
+    }
+</script>
 
 {% block content %}
 

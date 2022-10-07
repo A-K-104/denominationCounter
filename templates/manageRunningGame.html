@@ -13,7 +13,7 @@
 <body>
 <h2 class="title">Game home page</h2>
 
-<button onclick="redirectPage('run-game')">stop game</button>
+<button onclick="redirectPageWithConfPop('run-game')">stop game</button>
 
 <div class="section">
     <div class="container">
@@ -41,10 +41,11 @@
     window.onload = getGameScore;
     const interval = setInterval(getGameScore, 2000);
 
-    function redirectPage(path) {
-        location.assign(path + "/stop" + window.location.search)
+    function redirectPageWithConfPop(path) {
+        if (confirm('Are you sure that you want to stop the current game?')) {
+            location.assign(path + window.location.search)
+        }
     }
-
     function getGameScore() {
         fetch('/run-game/get-score' + window.location.search)
             .then((response) => {

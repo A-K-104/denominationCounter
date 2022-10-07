@@ -449,6 +449,6 @@ def convert_team_id_to_team_name_dict(game_score: dict, teams: list) -> dict:
     for score in game_score:
         for team in teams:
             if team.id == score:
-                new_dict[team.name] = {"score": game_score[score],
+                new_dict[team.name] = {"score": round(game_score[score], 2),
                                        "color": team.color}
     return new_dict

@@ -15,13 +15,19 @@
 <button onclick="redirectPage('stations')">stations</button>
 <button onclick="redirectPage('teams')">teams</button>
 <button onclick="redirectPage('old-games')">old games</button>
-<button onclick="redirectPage('new-game')">new game</button>
+<button onclick="redirectPageWithConfPop('new-game')">new game</button>
 <button onclick="redirectPage('run-game')">running game</button>
 
 </body>
 <script>
     function redirectPage(path) {
         location.assign(path + window.location.search)
+    }
+
+    function redirectPageWithConfPop(path) {
+        if (confirm('Are you sure that you want to create new game?')) {
+            location.assign(path + window.location.search)
+        }
     }
 </script>
 
