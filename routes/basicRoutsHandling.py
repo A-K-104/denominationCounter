@@ -465,5 +465,7 @@ def calc_station_status(game_session: GameSession):
     for station in game_stations:
         if station.connected and (datetime.utcnow() - station.last_ping).seconds / 60 > 2:
             station.connected = False
+        else:
+            station.connected = True
     db.session.commit()
 
