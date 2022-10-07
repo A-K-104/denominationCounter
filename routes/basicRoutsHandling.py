@@ -247,9 +247,8 @@ def live_station1():
         game.stationsTakeOvers.append(
             StationsTakeOvers(stationId=request.args['station-id'], teamId=request.args["team-id"]))
         db.session.commit()
-        return redirect(f'/live-station?session-id={game_session.id}'
-                        f'&station-id={request.args["station-id"]}&alerted=true')
-    return redirect('/')
+    return redirect(f'/live-station?session-id={game_session.id}'
+                    f'&station-id={request.args["station-id"]}&alerted=true')
 
 
 @basic_routs_handling.route('/new-game', methods=['GET', 'POST'])
