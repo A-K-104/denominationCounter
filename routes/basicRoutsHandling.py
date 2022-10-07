@@ -302,7 +302,7 @@ def running_game_get_live():
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
 
     calc_station_status(game_session)
-    game_score, station_score = calc_game(game_session, game_session.games[-1])
+    game_score, station_score = calc_game(game_session, game_session.games[-1], True)
     return {"gameScore": game_score, "stationScore": station_score}
 
 
@@ -365,7 +365,7 @@ def team_in_control(game: Games, station_id: int):
     return -1
 
 
-def calc_game(game_session: GameSession, game: Games) -> (None, None) or (dict, dict):
+def calc_game(game_session: GameSession, game: Games, for_running_game=False) -> (None, None) or (dict, dict):
     if not game_session.games.__contains__(game):
         return None, None
     result: dict = {}
@@ -383,8 +383,12 @@ def calc_game(game_session: GameSession, game: Games) -> (None, None) or (dict, 
                                              game.stationsTakeOvers, game_ended)
         team: Teams = db.session.query(Teams).filter_by(id=last_team).first()
         if team is not None:
-            last_team_dict[station.id] = {"name": station.name, "team": last_team, "color": team.color,
-                                          "teamName": team.name, "connected": station.connected, "lastPing": station.last_ping}
+            if for_running_game:
+                last_team_dict[station.id] = {"name": station.name, "team": last_team, "color": team.color,
+                                              "teamName": team.name, "connected": station.connected, "lastPing": station.last_ping}
+            else:
+                last_team_dict[station.id] = {"name": station.name, "team": last_team, "color": team.color,
+                                              "teamName": team.name}
         for team in game_session.teams:
             result[team.id] += sub_result[team.id]
     return result, last_team_dict

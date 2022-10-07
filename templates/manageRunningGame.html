@@ -57,8 +57,8 @@
                 <td>
                     <p id="pingStation{{station.id}}">{{station.last_ping}}</p>
                 </td>
-                <td id="connectedStationTd{{station.id}}">
-                    <p id="connectedStation{{station.id}}">{{station.connected}}</p>
+                <td id="connectedStationTd{{station.id}}" style="background: #FF0000">
+                    <p id="connectedStation{{station.id}}">disconnected</p>
                 </td>
             </tr>
             {%endfor%}
@@ -92,6 +92,7 @@
                             let connected = data["stationScore"][header]["connected"];
                             let connectedInput = document.getElementById("connectedStation" + header);
                             let connectedTd = document.getElementById("connectedStationTd" + header);
+                            debugger;
                             if (connected != null || !connected){
                                  connectedTd.style.background = "#FF0000";
                                  connectedInput.innerText = "connected"
