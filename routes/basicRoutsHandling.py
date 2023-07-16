@@ -297,7 +297,7 @@ def running_game_stop():
 def running_game_get_live():
     if not request.args.__contains__('id') or \
             db.session.query(GameSession).filter_by(id=request.args.get("id")).first() is None:
-        return {"status": 400, "error": "faild to find session"}, 400
+        return {"status": 400, "error": "failed to find session"}, 400
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
 
     calc_station_status(game_session)
