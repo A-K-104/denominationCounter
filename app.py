@@ -16,8 +16,7 @@ def create():
     app.logger.addHandler(file_handler)
     app.logger.setLevel(INFO)
     
-    @app.before_first_request
-    def create_tables():
+    with app.app_context():
         db.create_all()
 
     return app
