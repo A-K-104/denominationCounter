@@ -3,3 +3,4 @@
 /gameDatasq.db
 /logs/
 **/__pycache__/
+/instance/gameData.db

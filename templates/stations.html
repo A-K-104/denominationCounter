@@ -25,6 +25,11 @@
                 <input name="stations_point" type="number" step="0.1" autocomplete="off" value="1" required>
             </div>
             <br/><br>
+            <div class="login-field">
+                <label class="field-label"><b>station bonus seconds</b></label>
+                <input name="bonus_time_seconds" type="number" step="0.1" autocomplete="off" value="90" required>
+            </div>
+            <br/><br>
             <button name="add_team">enter</button>
         </form>
     </div>
@@ -35,6 +40,7 @@
             <tr>
                 <th>station id</th>
                 <th>station name</th>
+                <th>station bonus seconds</th>
                 <th>station points</th>
                 <th>edit</th>
                 <th>del</th>
@@ -49,6 +55,13 @@
                         {{station.name}}</p>
                 </td>
                 <form action="/stations/edit?id={{id}}&stationId={{station.id}}" method="post">
+
+                    <td style="width: 15%">
+                        <input name="bonus_time_seconds" type="number" step="1" class="editInput"
+                               value="{{station.bonus_time_seconds}}" readonly
+                               STYLE="width: 100%;"
+                               ondblclick='this.readOnly=false' required>
+                    </td>
                     <td style="width: 15%">
 
                         <input name="stations_point" type="number" step="0.1" id="" class="editInput"

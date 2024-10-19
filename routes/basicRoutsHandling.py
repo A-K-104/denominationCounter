@@ -156,7 +156,8 @@ def stations():
         if request.form.__contains__('stations_name') and request.form.__contains__('stations_point'):
             if db.session.query(Stations).filter_by(name=request.form['stations_name'],
                                                     session=request.args.get("id")).first() is None:
-                new_stations = Stations(name=request.form['stations_name'], point=request.form['stations_point'])
+                new_stations = Stations(name=request.form['stations_name'], point=request.form['stations_point'],
+                                        bonus_time_seconds=request.form['bonus_time_seconds'])
                 game_session.stations.append(new_stations)
                 db.session.commit()
             else:
@@ -195,6 +196,7 @@ def edit_station():
     if game_session is None or station is None:
         return redirect("/stations")
     station.point = request.form['stations_point']
+    station.bonus_time_seconds = request.form['bonus_time_seconds']
     db.session.commit()
 
     return redirect(f"/stations?id={request.args['id']}")
@@ -383,12 +385,13 @@ def calc_game(game_session: GameSession, game: Games, for_running_game=False) ->
     for station in game_session.stations:
 
         sub_result, last_team = station_calc(game_session.teams, station,
-                                             game.stationsTakeOvers, game_ended)
+                                             game.stationsTakeOvers, game_ended, game_session)
         team: Teams = db.session.query(Teams).filter_by(id=last_team).first()
         if team is not None:
             if for_running_game:
                 last_team_dict[station.id] = {"name": station.name, "team": last_team, "color": team.color,
-                                              "teamName": team.name, "connected": station.connected, "lastPing": station.last_ping}
+                                              "teamName": team.name, "connected": station.connected,
+                                              "lastPing": station.last_ping}
             else:
                 last_team_dict[station.id] = {"name": station.name, "team": last_team, "color": team.color,
                                               "teamName": team.name}
@@ -406,10 +409,12 @@ def get_list_of_take_overs_per_station(station: Stations, take_overs: list) -> l
 
 
 def station_calc(teams: list, station: Stations, take_overs: list,
-                 game_ended: datetime) -> (None, None) or (dict, int):
+                 game_ended: datetime, game_session: GameSession) -> (None, None) or (dict, int):
     result: dict = {}
     last_take_over: datetime or None = None
     pre_team: int or None = None
+    bonus_teams: list = []
+    bonus_enabled: bool = False
     for team in teams:
         result[team.id] = 0
     take_overs = get_list_of_take_overs_per_station(station, take_overs)
@@ -418,13 +423,27 @@ def station_calc(teams: list, station: Stations, take_overs: list,
             if result.__contains__(take_over.teamId):
                 if last_take_over is not None and pre_team is not None:
                     result[pre_team] += (take_over.date_created - last_take_over).seconds / 60 * station.point
-                    last_take_over = take_over.date_created
-                else:
-                    last_take_over = take_over.date_created
+                    result[pre_team] += station_bonus_calc(bonus_enabled, bonus_teams,
+                                                           (take_over.date_created - last_take_over).seconds,
+                                                           pre_team, station, game_session)
+
+                last_take_over = take_over.date_created
+                if pre_team is not None:
+                    bonus_enabled = True
             pre_team = take_over.teamId
         if last_take_over is not None:
-            result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point
+            result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point + \
+                                             station_bonus_calc(bonus_enabled, bonus_teams,
+                                                                (game_ended - last_take_over).seconds,
+                                                                take_overs[-1].teamId, station, game_session)
     return result, pre_team
+
+
+def station_bonus_calc(bonus_enabled: bool, bonus_teams: list, holding_time: int, team_id,
+                       station: Stations, game_session: GameSession) -> int:
+    if bonus_enabled and (not bonus_teams.__contains__(team_id)) and (holding_time >= game_session.bonus_minimum_hold):
+        return station.bonus_time_seconds * station.point
+    return 0
 
 
 def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
@@ -471,4 +490,3 @@ def calc_station_status(game_session: GameSession):
         else:
             station.connected = True
     db.session.commit()
-

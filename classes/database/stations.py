@@ -12,6 +12,7 @@ class Stations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     point = db.Column(db.Integer(), default=0, nullable=False)
+    bonus_time_seconds = db.Column(db.Integer(), default=90, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     connected = db.Column(db.Boolean, default=False, nullable=False)
     last_ping = db.Column(db.DateTime, default=datetime.utcnow)
