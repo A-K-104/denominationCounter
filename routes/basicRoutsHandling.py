@@ -428,7 +428,8 @@ def station_calc(teams: list, station: Stations, take_overs: list,
                                                            pre_team, station, game_session)
 
                 last_take_over = take_over.date_created
-                if pre_team is not None:
+                if pre_team is not None and \
+                        (take_over.date_created - last_take_over).seconds >= game_session.bonus_minimum_hold:
                     bonus_enabled = True
             pre_team = take_over.teamId
         if last_take_over is not None:
@@ -442,7 +443,7 @@ def station_calc(teams: list, station: Stations, take_overs: list,
 def station_bonus_calc(bonus_enabled: bool, bonus_teams: list, holding_time: int, team_id,
                        station: Stations, game_session: GameSession) -> int:
     if bonus_enabled and (not bonus_teams.__contains__(team_id)) and (holding_time >= game_session.bonus_minimum_hold):
-        return station.bonus_time_seconds * station.point
+        return station.bonus_time_seconds * station.point / 60
     return 0
 
 

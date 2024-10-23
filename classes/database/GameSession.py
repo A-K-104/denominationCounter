@@ -11,7 +11,7 @@ class GameSession(db.Model):
     name = db.Column(db.String(200), nullable=False)
     active = db.Column(db.Boolean(), default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
-    bonus_minimum_hold = db.Column(db.Integer(), default=15, nullable=False)
+    bonus_minimum_hold = db.Column(db.Integer(), default=20, nullable=False)
 
     games = db.relationship("Games", backref="GameSession", lazy=True)
     teams = db.relationship("Teams", backref="GameSession", lazy=True)
