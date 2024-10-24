@@ -65,6 +65,15 @@ def games_menu():
     return render_template("gameHomePage.html", id=request.args.get("id"))
 
 
+@basic_routs_handling.route('/update-session-bonus/<sessionId>', methods=['POST'])
+def update_session_bonus(sessionId):
+    game_session = db.session.query(GameSession).filter_by(id=sessionId).first()
+    game_session.bonus_minimum_hold = request.json['bonus_minimum_hold']
+    db.session.commit()
+
+    return "updated successfully"
+
+
 @basic_routs_handling.route('/teams', methods=['GET', 'POST'])
 def teams_handler():
     if not request.args.__contains__('id') or \
