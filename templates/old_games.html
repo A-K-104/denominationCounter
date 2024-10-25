@@ -18,6 +18,7 @@
                 <tr>
                     <th>team names</th>
                     <th>team scores</th>
+                    <th>team bonus</th>
                     <th>station hold</th>
                     <th>recalculate</th>
                 </tr>
@@ -31,6 +32,17 @@
                     <td>
                         {%for team in game.get("score")%}
                         <p style="color:{{game.get("score").get(team).get("color")}};">{{game.get("score").get(team).get("score")}}</p>
+                        {%endfor%}
+                    </td>
+                    <td>
+                        {%for team in game.get("score")%}
+                        <p style="color:{{game.get("score").get(team).get("color")}};">
+                            {% if game.get('team_bonus') is not none and game.get('team_bonus').get(team) is not none %}
+                                {{ game.get('team_bonus').get(team) }}
+                            {% else %}
+                                []
+                            {% endif %}
+                        </p>
                         {%endfor%}
                     </td>
                     <td>

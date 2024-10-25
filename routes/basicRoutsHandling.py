@@ -146,9 +146,9 @@ def re_calc_game():
     game_session: GameSession = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
     if game is None or game_session is None:
         return redirect("/")
-    game_res, last_teams = calc_game(game_session, game)
+    game_res, last_teams, team_bonus = calc_game(game_session, game)
     game_res = convert_team_id_to_team_name_dict(game_res, game_session.teams)
-    game.game_score = {"score": game_res, "lastTeams": last_teams, "id": game.id}
+    game.game_score = {"score": game_res, "lastTeams": last_teams, "team_bonus": team_bonus, "id": game.id}
 
     db.session.commit()
     return redirect(f"/old-games?id={game_session.id}")
@@ -312,8 +312,8 @@ def running_game_get_live():
     game_session = db.session.query(GameSession).filter_by(id=request.args.get("id")).first()
 
     calc_station_status(game_session)
-    game_score, station_score = calc_game(game_session, game_session.games[-1], True)
-    return {"gameScore": game_score, "stationScore": station_score}
+    game_score, station_score, team_bonus = calc_game(game_session, game_session.games[-1], True)
+    return {"gameScore": game_score, "stationScore": station_score, "team_bonus": team_bonus}
 
 
 @basic_routs_handling.route('/enter-to-session', methods=['GET', 'POST'])
@@ -379,6 +379,7 @@ def calc_game(game_session: GameSession, game: Games, for_running_game=False) ->
     if not game_session.games.__contains__(game):
         return None, None
     result: dict = {}
+    team_bonus: dict = {}
     last_team_dict: dict = {}
     for team in game_session.teams:
         result[team.id] = 0
@@ -394,7 +395,8 @@ def calc_game(game_session: GameSession, game: Games, for_running_game=False) ->
     for station in game_session.stations:
 
         sub_result, last_team = station_calc(game_session.teams, station,
-                                             game.stationsTakeOvers, game_ended, game_session)
+                                             game.stationsTakeOvers, game_ended,
+                                             game_session, team_bonus)
         team: Teams = db.session.query(Teams).filter_by(id=last_team).first()
         if team is not None:
             if for_running_game:
@@ -406,7 +408,7 @@ def calc_game(game_session: GameSession, game: Games, for_running_game=False) ->
                                               "teamName": team.name}
         for team in game_session.teams:
             result[team.id] += sub_result[team.id]
-    return result, last_team_dict
+    return result, last_team_dict, team_bonus
 
 
 def get_list_of_take_overs_per_station(station: Stations, take_overs: list) -> list:
@@ -418,7 +420,8 @@ def get_list_of_take_overs_per_station(station: Stations, take_overs: list) -> l
 
 
 def station_calc(teams: list, station: Stations, take_overs: list,
-                 game_ended: datetime, game_session: GameSession) -> (None, None) or (dict, int):
+                 game_ended: datetime, game_session: GameSession,
+                 team_bonus: dict) -> (None, None) or (dict, int):
     result: dict = {}
     last_take_over: datetime or None = None
     pre_team: int or None = None
@@ -434,9 +437,9 @@ def station_calc(teams: list, station: Stations, take_overs: list,
                     result[pre_team] += (take_over.date_created - last_take_over).seconds / 60 * station.point
                     result[pre_team] += station_bonus_calc(bonus_enabled, bonus_teams,
                                                            (take_over.date_created - last_take_over).seconds,
-                                                           pre_team, station, game_session)
+                                                           pre_team, station, game_session, team_bonus, teams)
 
-                if pre_team is not None and \
+                if not bonus_enabled and pre_team is not None and \
                         (take_over.date_created - last_take_over).seconds >= game_session.bonus_minimum_hold:
                     bonus_enabled = True
                 last_take_over = take_over.date_created
@@ -446,15 +449,24 @@ def station_calc(teams: list, station: Stations, take_overs: list,
             result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point + \
                                              station_bonus_calc(bonus_enabled, bonus_teams,
                                                                 (game_ended - last_take_over).seconds,
-                                                                take_overs[-1].teamId, station, game_session)
+                                                                take_overs[-1].teamId, station, game_session, team_bonus, teams)
     return result, pre_team
 
 
 def station_bonus_calc(bonus_enabled: bool, bonus_teams: list, holding_time: int, team_id,
-                       station: Stations, game_session: GameSession) -> int:
+                       station: Stations, game_session: GameSession, team_bonus: dict, session_teams: list) -> int:
     if bonus_enabled and (not bonus_teams.__contains__(team_id)) and (holding_time >= game_session.bonus_minimum_hold):
+        team_name = get_team_by_id(session_teams, team_id).name
+        team_bonus[team_name] = (team_bonus.get(team_name) or []) + [station.name]
         return station.bonus_time_seconds * station.point / 60
     return 0
+
+
+def get_team_by_id(session_teams: list, team_id) -> Teams or None:
+    for team in session_teams:
+        if team.id == team_id:
+            return team
+    return None
 
 
 def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
@@ -474,10 +486,10 @@ def get_game_id_from_re(game_request) -> (Games, Stations) or (None, None):
 
 def stop_running_game(running_game: Games, game_session: GameSession) -> None:
     running_game.date_ended = datetime.utcnow()
-    game_res, last_teams = calc_game(game_session, running_game)
+    game_res, last_teams, team_bonus = calc_game(game_session, running_game)
     game_res = convert_team_id_to_team_name_dict(game_res, game_session.teams)
 
-    running_game.game_score = {"score": game_res, "lastTeams": last_teams, "id": running_game.id}
+    running_game.game_score = {"score": game_res, "lastTeams": last_teams, "team_bonus": team_bonus, "id": running_game.id}
 
     running_game.active = False
     db.session.commit()
