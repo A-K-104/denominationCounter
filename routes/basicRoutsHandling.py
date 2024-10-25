@@ -436,10 +436,11 @@ def station_calc(teams: list, station: Stations, take_overs: list,
                                                            (take_over.date_created - last_take_over).seconds,
                                                            pre_team, station, game_session)
 
-                last_take_over = take_over.date_created
                 if pre_team is not None and \
                         (take_over.date_created - last_take_over).seconds >= game_session.bonus_minimum_hold:
                     bonus_enabled = True
+                last_take_over = take_over.date_created
+
             pre_team = take_over.teamId
         if last_take_over is not None:
             result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point + \
