@@ -425,7 +425,6 @@ def station_calc(teams: list, station: Stations, take_overs: list,
     result: dict = {}
     last_take_over: datetime or None = None
     pre_team: int or None = None
-    bonus_teams: list = []
     bonus_enabled: bool = False
     for team in teams:
         result[team.id] = 0
@@ -435,7 +434,7 @@ def station_calc(teams: list, station: Stations, take_overs: list,
             if result.__contains__(take_over.teamId):
                 if last_take_over is not None and pre_team is not None:
                     result[pre_team] += (take_over.date_created - last_take_over).seconds / 60 * station.point
-                    result[pre_team] += station_bonus_calc(bonus_enabled, bonus_teams,
+                    result[pre_team] += station_bonus_calc(bonus_enabled,
                                                            (take_over.date_created - last_take_over).seconds,
                                                            pre_team, station, game_session, team_bonus, teams)
 
@@ -447,18 +446,19 @@ def station_calc(teams: list, station: Stations, take_overs: list,
             pre_team = take_over.teamId
         if last_take_over is not None:
             result[take_overs[-1].teamId] += (game_ended - last_take_over).seconds / 60 * station.point + \
-                                             station_bonus_calc(bonus_enabled, bonus_teams,
+                                             station_bonus_calc(bonus_enabled,
                                                                 (game_ended - last_take_over).seconds,
                                                                 take_overs[-1].teamId, station, game_session, team_bonus, teams)
     return result, pre_team
 
 
-def station_bonus_calc(bonus_enabled: bool, bonus_teams: list, holding_time: int, team_id,
+def station_bonus_calc(bonus_enabled: bool, holding_time: int, team_id,
                        station: Stations, game_session: GameSession, team_bonus: dict, session_teams: list) -> int:
-    if bonus_enabled and (not bonus_teams.__contains__(team_id)) and (holding_time >= game_session.bonus_minimum_hold):
-        team_name = get_team_by_id(session_teams, team_id).name
-        team_bonus[team_name] = (team_bonus.get(team_name) or []) + [station.name]
-        return station.bonus_time_seconds * station.point / 60
+    team_name = get_team_by_id(session_teams, team_id).name
+    if bonus_enabled and (holding_time >= game_session.bonus_minimum_hold):
+        if not team_bonus.get(team_name) or not team_bonus[team_name].__contains__(station.name):
+            team_bonus[team_name] = (team_bonus.get(team_name) or []) + [station.name]
+            return station.bonus_time_seconds * station.point / 60
     return 0
 
 
