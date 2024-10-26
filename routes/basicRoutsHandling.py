@@ -133,7 +133,9 @@ def old_games():
         if not game.active:
             if game.game_score == {}:
                 return redirect(f"/old-games/re-calc?game-id={game.id}&id={game_session.id}")
+            game.game_score['score'] = dict(sorted(game.game_score['score'].items(), key=lambda item: item[1]['score'], reverse=True))
             games_score.append(game.game_score)
+
     return render_template("old_games.html", gamesScore=games_score,
                            sessionId=game_session.id, id=request.args.get("id"))
 
